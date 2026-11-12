@@ -5,8 +5,9 @@ CC := $(TOOLCHAIN)/arm-none-eabi-gcc
 SIZE := $(TOOLCHAIN)/arm-none-eabi-size
 OBJCOPY := $(TOOLCHAIN)/arm-none-eabi-objcopy
 BUILD ?= build
+COIL_PULSE_MS ?= 0
 
-CPPFLAGS := -DSTM32C031xx -DNUCLEO_C031C6 -Icourse/chipheaders/Device -Icourse/chipheaders/Include -Icourse/mylib -ILibrary -ISrc
+CPPFLAGS := -DSTM32C031xx -DNUCLEO_C031C6 -DSOLENOID_PULSE_MS=$(COIL_PULSE_MS) -Icourse/chipheaders/Device -Icourse/chipheaders/Include -Icourse/mylib -ILibrary -ISrc
 CFLAGS := -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -std=gnu11 -Og -g3 -Wall -Wextra -MMD -MP -ffunction-sections -fdata-sections
 LDFLAGS := -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -TSTM32C031C6TX_FLASH.ld --specs=nano.specs --specs=nosys.specs -Wl,--gc-sections
 
