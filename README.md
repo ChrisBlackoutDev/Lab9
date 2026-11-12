@@ -15,6 +15,8 @@ The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing
 
 ## Pins and behavior
 
+The [complete wiring diagram](docs/full_breadboard_wiring.png) combines the input dividers, Bluefruit connections, and the separate Lab 3 solenoid driver. It is an electrical schematic, so verify your breadboard's actual row and power-rail breaks before connecting power.
+
 | Part | Arduino pin | MCU pin | Configuration |
 |---|---|---|---|
 | Pot wiper | A3 | PB1 | ADC channel 18; outer legs 3V3 and GND |
