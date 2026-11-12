@@ -66,8 +66,9 @@ static int read_adc(unsigned int channel) {
 static void send_status(const SafeState *state) {
     char line[96];
     (void)snprintf(line, sizeof(line), "POT=%u DOOR=%s LIGHT=%u SOLENOID=%s\r\n",
-                   state->pot, state->door_closed ? "CLOSED" : "NOT_CLOSED",
-                   state->light,
+                   (unsigned int)state->pot,
+                   state->door_closed ? "CLOSED" : "NOT_CLOSED",
+                   (unsigned int)state->light,
 #if SOLENOID_PULSE_MS > 0U
                    state->pulse_active ? "ON" : "OFF"
 #else
