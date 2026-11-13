@@ -1,6 +1,6 @@
 # Lab 9 smart-safe breadboard prototype: I/O pinout
 
-Board: **NUCLEO-C031C6**. This is the tested breadboard prototype, with a hand-pressed pushbutton standing in for a future door-position switch. The solenoid retracts the latch; the button does not sense latch position. The Nucleo is currently flashed with the 300 ms solenoid-pulse build (`make coil`).
+Board: **NUCLEO-C031C6**. This is the tested breadboard prototype, with a hand-pressed pushbutton standing in for a future door-position switch. The solenoid retracts the latch; the button does not sense latch position. The 2026-11-12 hardware tests used a 300 ms solenoid-pulse build (`make coil`); the later source refactor has not yet been flashed.
 
 ## Pins already assigned
 
@@ -32,6 +32,6 @@ Directions below are from the **Nucleo's** point of view. `D*` and `A*` are the 
 - The pot must first read low (ADC **0–1228**) to arm. While the button is held, moving it high (ADC **2867–4095**) requests one pulse. Holding it high does not repeat the request.
 - Bluefruit uses USART1 at **9600 baud** with RTS/CTS flow control. The USB console uses USART2 at **9600 baud**. Both UARTs are polled in the main loop. Wireless or USB `U` requests a pulse while the button is held; `L` cancels; `?` requests status.
 - A **1 ms SysTick interrupt** supplies timing. Status (`POT`, `DOOR`, `LIGHT`, `SOLENOID`) is sent over BLE every **1 second**. No ADC, button, or UART interrupt is used in this version.
-- `make all` builds a coil-disabled version for logic testing. `make coil` builds the tested **300 ms** pulse version currently on the Nucleo.
+- `make all` builds a coil-disabled version for logic testing. `make coil` builds the **300 ms** pulse version used in the earlier hardware test.
 
 Source: [`Src/Lab9Prototype.c`](../Src/Lab9Prototype.c), [`Src/SafeLogic.c`](../Src/SafeLogic.c), [`Library/uart1.c`](../Library/uart1.c), and the [bench test record](../prototype_progress.md).

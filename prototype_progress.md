@@ -2,8 +2,8 @@
 
 - Board: ST-LINK identified NUCLEO-C031C6 / STM32C03x, 32 KB flash, 3.24 V target voltage. The ST-LINK USB virtual COM port was available during the test.
 - Source and build: `make -B all passthrough`, `make coil`, and the host `SafeLogic` test passed. The default `make all` binary leaves PB5 low. `make coil` builds a separate 300 ms pulse binary.
-- Firmware: ST-LINK flash and readback verification passed for both default and 300 ms builds. The Nucleo is currently flashed with `build/coil/Lab9Prototype.bin`, SHA-256 `b188a709eff42d819db899d553d86c98cbda2a9d686d82c9eff0a3e16db74125`.
-- Previous board flash: backed up before programming to `/home/kensa/Documents/ES28F26/board_backups/NUCLEO-C031C6-before-Lab9-2026-11-12.bin` outside the Git repository.
+- Firmware: ST-LINK flash and readback verification passed for both default and 300 ms builds. The 300 ms binary used in this test had SHA-256 `b188a709eff42d819db899d553d86c98cbda2a9d686d82c9eff0a3e16db74125`. The later source refactor has been built but has not yet been flashed or retested on the board.
+- Previous board flash: backed up before programming; the backup is outside this Git repository.
 - Pushbutton: live USB status changed `NOT_CLOSED → CLOSED → NOT_CLOSED` during a hand press and release. The 0.15 µF capacitor's individual value was not measured.
 - Potentiometer: live ADC readings covered the full `0–4095` range. The student observed one solenoid actuation when moving low to high while holding the button.
 - LDR: covering it changed the ADC reading from about `2850` to `1280`; uncovering restored the higher reading.

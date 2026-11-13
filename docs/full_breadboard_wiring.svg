@@ -104,11 +104,11 @@
 
   <!-- Solenoid section -->
   <rect class="panel" x="30" y="912" width="1540" height="317"/>
-  <text class="section" x="55" y="952">3. Lab 3 low-side solenoid driver — external supply remains DISCONNECTED for now</text>
+  <text class="section" x="55" y="952">3. Lab 3 low-side solenoid driver — 9 V DC adapter, 300 ms pulse build</text>
   <text class="label" x="75" y="1065">D6 / PB5</text>
   <line class="signal" x1="205" y1="1057" x2="325" y2="1057"/>
   <rect x="325" y="1028" width="215" height="58" rx="10" fill="#fff7e3" stroke="#a64712" stroke-width="3"/>
-  <text class="label" x="357" y="1065">Rlim: verify value</text>
+  <text class="label" x="395" y="1065">150 Ω</text>
   <line class="signal" x1="540" y1="1057" x2="677" y2="1057"/>
   <circle cx="705" cy="1057" r="28" fill="#ffffff" stroke="#253143" stroke-width="3"/>
   <text class="label" x="688" y="1065">B</text>
@@ -122,7 +122,7 @@
   <text class="small" x="1086" y="1030">black lead</text>
   <line class="coil" x1="1122" y1="978" x2="1122" y2="967"/>
   <line class="coil" x1="1122" y1="967" x2="1360" y2="967"/>
-  <text class="label" x="1367" y="974" fill="#ad5b00">external + (verify)</text>
+  <text class="label" x="1367" y="974" fill="#ad5b00">9 V jack VIN</text>
   <text class="small" x="1220" y="1000">red lead</text>
   <line class="ground" x1="826" y1="1105" x2="826" y2="1165"/>
   <line class="ground" x1="826" y1="1165" x2="1360" y2="1165"/>

@@ -1,18 +1,27 @@
 # ENGS 28 Lab 9 breadboard prototype
 
-Target: NUCLEO-C031C6 with Adafruit Bluefruit LE UART Friend. This is a separate project copy; Lab 8 is untouched. The default build keeps PB5 solenoid drive **off** and shows an allowed unlock request on the on-board LED for 1 second. The breadboard prototype was tested on the connected Nucleo on 2026-11-12 with a separate 300 ms coil build.
+Target: NUCLEO-C031C6 with an Adafruit Bluefruit LE UART Friend. The default build keeps PB5 solenoid drive **off** and shows an accepted unlock request on the on-board LED for 1 second. `make coil` builds the 300 ms solenoid-pulse version used in the breadboard tests on 2026-11-12. This is a breadboard prototype; the pushbutton simulates a closed door.
 
-## Build
+## Build and test
+
+Install GNU Make, an Arm GNU bare-metal toolchain (`arm-none-eabi-gcc`, `arm-none-eabi-size`, and `arm-none-eabi-objcopy`), and a host C compiler for `make test`. The firmware uses the course's 12 MHz STM32C031 clock setup and does not require STM32 HAL.
+
+The Makefile finds the STM32CubeIDE toolchain at the path used for the original bench build. On another computer, put `arm-none-eabi-*` on `PATH` and run `make TOOLCHAIN=`, or set `TOOLCHAIN=/path/to/tools/bin`. The `TOOLCHAIN` setting can also be provided as an environment variable.
 
 ```sh
 make all          # integrated prototype, build/Lab9Prototype.bin
 make coil         # tested 300 ms solenoid pulse, build/coil/Lab9Prototype.bin
 make passthrough  # Day 17 two-way UART exercise, build/Passthrough.bin
-cc -std=c11 -Wall -Wextra -Werror -ISrc Src/SafeLogic.c tests/test_safe_logic.c -o /tmp/lab9_safe_logic_test
-/tmp/lab9_safe_logic_test
+make test         # host-side interlock and pulse logic test
 ```
 
-The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing 12 MHz course clock setup. The ST-LINK previously reported a NUCLEO-C031C6, and the board was flashed with a verified 300 ms coil build before the final source refactor. The refactored binaries have been built but have not yet been flashed. `make all` remains the coil-disabled test build.
+To flash a binary, connect the Nucleo's ST-LINK USB port and use STM32CubeProgrammer. For example, with its CLI on `PATH`:
+
+```sh
+STM32_Programmer_CLI -c port=SWD -w build/Lab9Prototype.bin 0x08000000 -v -rst
+```
+
+Use `build/coil/Lab9Prototype.bin` in that command only for the wired, externally powered solenoid setup. The default image is useful for testing the button, sensors, UARTs, BLE, and LD4 while the solenoid drive stays off. The refactored binaries build successfully but have not yet been flashed; the [bench log](prototype_progress.md) records the earlier hardware test.
 
 ## Pins and behavior
 
@@ -32,11 +41,11 @@ Share the [group I/O pinout](docs/group_pinout.md) for the final-project check-i
 | Bluefruit MOD | D10 | PB0 | Output; HIGH command, LOW data |
 | USB console | built in | PA2 / PA3 | USART2 at 9600 baud |
 
-The button is an active-low **pushbutton**, per the student's latest choice. Lab 3 specifies a debouncing capacitor; use the course's nonpolarized 0.15 µF capacitor **between PB10/D4 and GND, in parallel with the button**, as shown on the [complete diagram](docs/full_breadboard_wiring.png). The firmware also debounces the input in software. On a four-leg tactile button, some legs are internally joined; use continuity mode to select a pair that is open when released and closed when pressed. Never put the button directly across 3V3 and GND.
+The button is an active-low **pushbutton**. Lab 3 specifies a debouncing capacitor; use the course's nonpolarized 0.15 µF capacitor **between PB10/D4 and GND, in parallel with the button**, as shown on the [complete diagram](docs/full_breadboard_wiring.png). The firmware also debounces the input in software. On a four-leg tactile button, some legs are internally joined; use continuity mode to select a pair that is open when released and closed when pressed. Never put the button directly across 3V3 and GND.
 
 The pot must first enter its low region (ADC 0–1228) to arm one local request. Moving it high (2867–4095) while the button is pressed triggers one request. Holding high does not repeat. The button is debounced for 25 ms. Releasing it cancels an active request. The raw light value is for observation only. `U` requests, `L` cancels, `?` sends status. The phone receives a line every second: `POT`, `DOOR`, `LIGHT`, `SOLENOID`. `SOLENOID=DISABLED` means PB5 is still forced low. The advertised name is `ENGS28-Safe-Kensa` if the startup AT sequence succeeds. The USB console also prints status once per second when no pulse is active.
 
-The pushbutton simulates door position, while the solenoid retracts a latch. The student confirmed the Lab 3 9 V DC adapter and driver wiring: barrel board `VIN` to solenoid red, solenoid black to KSC2073 collector, emitter to shared GND, and D6/PB5 through 150 Ω to the base. The barrel board's `5V` pin is unused for the solenoid. A 300 ms pulse moved the latch in the powered bench tests; `make coil` reproduces that build. The coil's current and long-term duty rating have not been measured. Unplug the 9 V adapter when not actively demonstrating the prototype. The LED is useful feedback; the Lab 9 handout does not establish that it qualifies as the required second actuator for the final graded project.
+The pushbutton simulates door position, while the solenoid retracts a latch. The tested Lab 3 driver wiring used a 9 V DC adapter: barrel board `VIN` to solenoid red, solenoid black to KSC2073 collector, emitter to shared GND, and D6/PB5 through 150 Ω to the base. The barrel board's `5V` pin is unused for the solenoid. A 300 ms pulse moved the latch in the powered bench tests; `make coil` reproduces that build. The coil's current and long-term duty rating have not been measured. Unplug the 9 V adapter when not actively demonstrating the prototype. The LED is useful feedback; the Lab 9 handout does not establish that it qualifies as the required second actuator for the final graded project.
 
 ## Source map
 
@@ -50,7 +59,9 @@ The pushbutton simulates door position, while the solenoid retracts a latch. The
 | `Src/Passthrough.c` | Day 17 passthrough exercise adapted for nonblocking USART1 transmit |
 | `Library/ble.c` | Lab 9 section 4.4 startup sequence; bounded command waits and nonblocking data queue |
 
-Class archive: `/home/kensa/Downloads/courseinfo/ENGS28_course_archive`. The source review checked its supplied `uart.c`, `button.c`, `ADCPot.c`, Day 17 BLE slides, and Lab 9 handout. The archive has no supplied USART1 driver, BLE startup function, or two-channel ADC library; the Day 17 slides and Lab 9 handout direct students to write the USART1 and BLE parts. Lab 9 and Day 17 PDFs are also in the handoff ZIP. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
+The course source review checked the supplied `uart.c`, `button.c`, `ADCPot.c`, Day 17 BLE slides, and Lab 9 handout. The handouts and slides are not bundled here. They contain no supplied USART1 driver, BLE startup function, or two-channel ADC library; the Day 17 slides and Lab 9 handout direct students to write the USART1 and BLE parts. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
+
+The `course/chipheaders` support files and ST-generated startup/linker files retain their upstream copyright and license notices. No project-wide license is specified for the class-derived code.
 
 ## Bench verification
 

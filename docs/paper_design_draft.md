@@ -1,12 +1,12 @@
 # Lab 9 paper design draft
 
-This is the breadboard design prepared from the course Lab 9 handout. Final transistor wiring and pulse duration require inspection of the actual parts. The final project also needs an instructor-approved second actuator.
+This design began with the course Lab 9 handout and was then used for the 2026-11-12 breadboard test. The 9 V adapter, 150 Ω base resistor, and 300 ms pulse moved the latch during that test. Coil current and long-term duty rating remain unmeasured. The final graded project still needs an instructor-approved second actuator.
 
 ## Schematics
 
 - [Illustrated breadboard layout](breadboard_layout.png) and [complete breadboard circuit](full_breadboard_wiring.png), including the Lab 2/Lab 3 nonpolarized 0.15 µF capacitor across the door-position pushbutton: PB10/D4 to GND when pressed.
 - [Bluefruit UART, flow control, MOD, and power](ble_wiring.png).
-- [Original Lab 3 KSC2073 solenoid driver](lab3_driver.png). The coil's external positive rail is separate from 3V3; its actual supply, resistor, part polarity, and pulse limit remain unverified. Do not energize it from this drawing alone.
+- [Original Lab 3 KSC2073 solenoid driver](lab3_driver.png). The current breadboard connections are in the [complete circuit](full_breadboard_wiring.png): 9 V DC adapter and 150 Ω base resistor, with the external positive rail separate from 3V3. Confirm the actual transistor marking and lead orientation before powering the driver.
 
 ## USART1 alternate functions
 
@@ -37,4 +37,4 @@ Repeat:
       Send one queued BLE character when USART1 can accept it.
 ```
 
-The default firmware uses an LED-only request indication and holds PB5 low. A real solenoid pulse is a later hardware-verified build setting. The pushbutton only simulates a closed door; no latch position is sensed.
+The default firmware uses an LED-only request indication and holds PB5 low. `make coil` enables the 300 ms pulse used in the earlier breadboard test. The pushbutton only simulates a closed door; no latch position is sensed.

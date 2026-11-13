@@ -1,9 +1,12 @@
 .DEFAULT_GOAL := all
 
-TOOLCHAIN := /opt/st/stm32cubeide_2.2.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.linux64_1.0.100.202602081740/tools/bin
-CC := $(TOOLCHAIN)/arm-none-eabi-gcc
-SIZE := $(TOOLCHAIN)/arm-none-eabi-size
-OBJCOPY := $(TOOLCHAIN)/arm-none-eabi-objcopy
+LOCAL_TOOLCHAIN := /opt/st/stm32cubeide_2.2.0/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.linux64_1.0.100.202602081740/tools/bin
+TOOLCHAIN ?= $(if $(wildcard $(LOCAL_TOOLCHAIN)/arm-none-eabi-gcc),$(LOCAL_TOOLCHAIN),)
+CROSS_COMPILE := $(if $(TOOLCHAIN),$(TOOLCHAIN)/,)arm-none-eabi-
+CC := $(CROSS_COMPILE)gcc
+SIZE := $(CROSS_COMPILE)size
+OBJCOPY := $(CROSS_COMPILE)objcopy
+HOST_CC ?= cc
 BUILD ?= build
 COIL_PULSE_MS ?= 0
 
@@ -19,8 +22,14 @@ PROTOTYPE := $(OBJECTS) $(BUILD)/Library/ADC.o $(BUILD)/Library/ble.o $(BUILD)/S
 
 all: $(BUILD)/Lab9Prototype.bin
 passthrough: $(BUILD)/Passthrough.bin
+test: $(BUILD)/test_safe_logic
+	$(BUILD)/test_safe_logic
 coil:
 	$(MAKE) -B BUILD=build/coil COIL_PULSE_MS=300 all
+
+$(BUILD)/test_safe_logic: Src/SafeLogic.c Src/SafeLogic.h tests/test_safe_logic.c
+	@mkdir -p $(dir $@)
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -ISrc Src/SafeLogic.c tests/test_safe_logic.c -o $@
 
 $(BUILD)/Lab9Prototype.elf: $(BUILD)/Src/Lab9Prototype.o $(PROTOTYPE) STM32C031C6TX_FLASH.ld
 	$(CC) $(LDFLAGS) -Wl,-Map=$(@:.elf=.map) $(filter %.o,$^) -Wl,--start-group -lc -lm -Wl,--end-group -o $@
@@ -41,4 +50,4 @@ $(BUILD)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-.PHONY: all passthrough coil
+.PHONY: all passthrough test coil
