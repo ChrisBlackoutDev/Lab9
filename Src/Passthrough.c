@@ -1,4 +1,9 @@
-/* Day 17 BLE passthrough exercise, kept separate from the prototype main(). */
+/*
+ * Day 17 USART passthrough exercise
+ *
+ * D1 / PB6, D0 / PB7, D5 / PB4, D3 / PB3: USART1 and flow control
+ * PA2 / PA3: ST-LINK USB console on USART2
+ */
 #include <stdio.h>
 #include "uart.h"
 #include "uart1.h"

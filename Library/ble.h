@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 
-bool ble_init(void);
-bool ble_queue(const char *message);
-void ble_poll(void);
+bool BLE_Init(void);
+bool BLE_Queue(const char *message);
+void BLE_Poll(void);
 
 #endif

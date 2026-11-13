@@ -1,23 +1,34 @@
-/* Bluefruit MOD/startup sequence from Lab 9 sections 4.3-4.4. */
+/*
+ * Bluefruit command setup and nonblocking data output
+ *
+ * D10 / PB0: Bluefruit MOD pin; HIGH selects command mode
+ * D1 / PB6, D0 / PB7, D5 / PB4, D3 / PB3: USART1 and flow control
+ */
 #include "ble.h"
 #include "uart1.h"
 #include "ES28.h"
 
-#define MOD_PIN (1U << 0)
+#define MOD_BITNUM 0U
+#define MOD_BITMASK (1U << MOD_BITNUM)
+#define GPIO_BSRR_RESET_BIT_OFFSET 16U
 #define TX_CAPACITY 192U
 #define COMMAND_TIMEOUT_MS 1500U
 #define RESPONSE_TIMEOUT_MS 2500U
 #define RESPONSE_IDLE_MS 20U
+#define COMMAND_STARTUP_MS 300U
+#define COMMAND_SETTLE_MS 200U
+#define DATA_MODE_SETTLE_MS 200U
 
-static char tx_buffer[TX_CAPACITY];
-static unsigned int tx_head;
-static unsigned int tx_tail;
+static char tx_buffer[TX_CAPACITY] = {0};
+static unsigned int tx_head = 0U;
+static unsigned int tx_tail = 0U;
 
-static void set_command_mode(bool command_mode) {
-    GPIOB->BSRR = command_mode ? MOD_PIN : (MOD_PIN << 16);
+static void SetCommandMode(bool command_mode) {
+    GPIOB->BSRR = command_mode ? MOD_BITMASK
+                             : (MOD_BITMASK << GPIO_BSRR_RESET_BIT_OFFSET);
 }
 
-static bool send_command(const char *command) {
+static bool SendCommand(const char *command) {
     uint32_t started = milliseconds();
     for (const char *p = command; *p != '\0'; ++p) {
         while (!uart1_tryWrite(*p)) {
@@ -46,31 +57,31 @@ static bool send_command(const char *command) {
             break;
         }
     }
-    delay_ms(200U);
+    delay_ms(COMMAND_SETTLE_MS);
     return saw_ok;
 }
 
-bool ble_init(void) {
+bool BLE_Init(void) {
     RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
-    set_command_mode(true);
+    SetCommandMode(true);
     GPIOB->MODER = (GPIOB->MODER & ~GPIO_MODER_MODE0_Msk)
                  | (GPIO_OUTPUT << GPIO_MODER_MODE0_Pos);
     uart1_init();
-    delay_ms(300U);
+    delay_ms(COMMAND_STARTUP_MS);
 
-    bool okay = send_command("AT+FACTORYRESET\r\n");
+    bool okay = SendCommand("AT+FACTORYRESET\r\n");
     if (okay) {
-        okay = send_command("AT+GAPDEVNAME=ENGS28-Safe-Kensa\r\n");
+        okay = SendCommand("AT+GAPDEVNAME=ENGS28-Safe-Kensa\r\n");
     }
     if (okay) {
-        okay = send_command("ATZ\r\n");
+        okay = SendCommand("ATZ\r\n");
     }
-    set_command_mode(false);
-    delay_ms(200U);
+    SetCommandMode(false);
+    delay_ms(DATA_MODE_SETTLE_MS);
     return okay;
 }
 
-bool ble_queue(const char *message) {
+bool BLE_Queue(const char *message) {
     unsigned int length = 0U;
     while (message[length] != '\0') {
         ++length;
@@ -90,7 +101,7 @@ bool ble_queue(const char *message) {
     return true;
 }
 
-void ble_poll(void) {
+void BLE_Poll(void) {
     if (tx_tail != tx_head && uart1_tryWrite(tx_buffer[tx_tail])) {
         tx_tail = (tx_tail + 1U) % TX_CAPACITY;
     }

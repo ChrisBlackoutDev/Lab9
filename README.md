@@ -12,7 +12,7 @@ cc -std=c11 -Wall -Wextra -Werror -ISrc Src/SafeLogic.c tests/test_safe_logic.c 
 /tmp/lab9_safe_logic_test
 ```
 
-The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing 12 MHz course clock setup. The connected ST-LINK reported a NUCLEO-C031C6, and the board is currently flashed with the verified `build/coil/Lab9Prototype.bin`. `make all` remains the coil-disabled test build.
+The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing 12 MHz course clock setup. The ST-LINK previously reported a NUCLEO-C031C6, and the board was flashed with a verified 300 ms coil build before the final source refactor. The refactored binaries have been built but have not yet been flashed. `make all` remains the coil-disabled test build.
 
 ## Pins and behavior
 
@@ -42,14 +42,15 @@ The pushbutton simulates door position, while the solenoid retracts a latch. The
 
 | Source | Origin / change |
 |---|---|
-| `Library/ADC.*`, `sysinit.c`, `uart.c`, board headers/startup | Copied from local Lab 8 class project; one Day 17 `uart2_RxAvail()` addition |
+| `sysinit.c`, `uart.c`, board headers/startup | Copied from the local Lab 8 class project; `uart.c` is the supplied course UART driver plus the Day 17 `uart2_RxAvail()` addition |
+| `Library/ADC.*` | Reused from the tested Lab 8 project; extends the course `ADCPot.c` example to handle both ADC channels, calibration, and bounded waits |
 | `Src/SafeLogic.c` | New integration of Lab 3's button debounce, with PB10 replacing conflicting PB4, plus pulse/interlock logic |
 | `Src/Lab9Prototype.c` | Lab 3 PB5 output pattern, Lab 4 PB1 ADC, Lab 8 PA0 ADC read pattern, new main loop |
 | `Library/uart1.c` | New USART1 driver following the class USART2 driver and Day 17 slides; RTS/CTS added |
 | `Src/Passthrough.c` | Day 17 passthrough exercise adapted for nonblocking USART1 transmit |
 | `Library/ble.c` | Lab 9 section 4.4 startup sequence; bounded command waits and nonblocking data queue |
 
-Class archive: `/home/kensa/Downloads/courseinfo/ENGS28_course_archive`; Lab 9 and Day 17 PDFs are also in the handoff ZIP. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
+Class archive: `/home/kensa/Downloads/courseinfo/ENGS28_course_archive`. The source review checked its supplied `uart.c`, `button.c`, `ADCPot.c`, Day 17 BLE slides, and Lab 9 handout. The archive has no supplied USART1 driver, BLE startup function, or two-channel ADC library; the Day 17 slides and Lab 9 handout direct students to write the USART1 and BLE parts. Lab 9 and Day 17 PDFs are also in the handoff ZIP. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
 
 ## Bench verification
 

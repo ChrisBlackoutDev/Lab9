@@ -17,11 +17,11 @@ typedef struct {
     uint16_t light;
 } SafeState;
 
-void safe_init(SafeState *state, uint32_t now);
-void safe_sample(SafeState *state, uint32_t now, bool button_pressed,
+void InitializeSafe(SafeState *state, uint32_t now);
+void SampleSafe(SafeState *state, uint32_t now, bool button_pressed,
                  uint16_t pot, uint16_t light, uint32_t pulse_ms);
-bool safe_command(SafeState *state, char command, uint32_t now);
-void safe_expire(SafeState *state, uint32_t now, uint32_t pulse_ms);
-void safe_cancel(SafeState *state);
+bool ProcessSafeCommand(SafeState *state, char command, uint32_t now);
+void ExpireSafe(SafeState *state, uint32_t now, uint32_t pulse_ms);
+void CancelSafe(SafeState *state);
 
 #endif

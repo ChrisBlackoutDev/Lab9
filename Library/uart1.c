@@ -1,18 +1,29 @@
-/* USART1 follows the course USART2 polling driver and Day 17 BLE pin plan. */
+/*
+ * USART1 polling driver based on the course USART2 driver and Day 17 slides
+ *
+ * D1 / PB6: USART1 TX to Bluefruit RXI
+ * D0 / PB7: USART1 RX from Bluefruit TXO
+ * D5 / PB4: USART1 CTS from Bluefruit RTS
+ * D3 / PB3: USART1 RTS to Bluefruit CTS
+ */
 #include "uart1.h"
 #include "ES28.h"
 
 #define UART_BAUD_RATE 9600U
 #define APB_CLK 12000000U
+#define UART_DATA_MASK 0xFFU
 
 void uart1_init(void) {
     RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
 
     /* PB6 TX and PB7 RX use AF0; PB4 CTS and PB3 RTS use AF4. */
-    const uint32_t pins = (3U << 6) | (3U << 8) | (3U << 12) | (3U << 14);
+    const uint32_t pins = GPIO_MODER_MODE3_Msk | GPIO_MODER_MODE4_Msk
+                        | GPIO_MODER_MODE6_Msk | GPIO_MODER_MODE7_Msk;
     GPIOB->MODER = (GPIOB->MODER & ~pins)
-                 | (GPIO_ALTERNATE << 6) | (GPIO_ALTERNATE << 8)
-                 | (GPIO_ALTERNATE << 12) | (GPIO_ALTERNATE << 14);
+                 | (GPIO_ALTERNATE << GPIO_MODER_MODE3_Pos)
+                 | (GPIO_ALTERNATE << GPIO_MODER_MODE4_Pos)
+                 | (GPIO_ALTERNATE << GPIO_MODER_MODE6_Pos)
+                 | (GPIO_ALTERNATE << GPIO_MODER_MODE7_Pos);
     GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL3_Msk | GPIO_AFRL_AFSEL4_Msk
                       | GPIO_AFRL_AFSEL6_Msk | GPIO_AFRL_AFSEL7_Msk);
     GPIOB->AFR[0] |= (GPIO_AF4 << GPIO_AFRL_AFSEL3_Pos)
@@ -33,7 +44,7 @@ int uart1_RxAvail(void) {
 }
 
 int uart1_read(void) {
-    return (int)(USART1->RDR & 0xFFU);
+    return (int)(USART1->RDR & UART_DATA_MASK);
 }
 
 /* CTS may stay high if the module is missing: never wait here. */
@@ -41,6 +52,6 @@ int uart1_tryWrite(int ch) {
     if ((USART1->ISR & USART_ISR_TXE_TXFNF) == 0U) {
         return 0;
     }
-    USART1->TDR = (uint32_t)ch & 0xFFU;
+    USART1->TDR = (uint32_t)ch & UART_DATA_MASK;
     return 1;
 }
