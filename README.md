@@ -29,7 +29,7 @@ The [complete wiring diagram](docs/full_breadboard_wiring.png) combines the inpu
 | Bluefruit MOD | D10 | PB0 | Output; HIGH command, LOW data |
 | USB console | built in | PA2 / PA3 | USART2 at 9600 baud |
 
-The button is an active-low **pushbutton**, per the student's latest choice. The schematic is [docs/pushbutton.svg](docs/pushbutton.svg). On a four-leg tactile button, some legs are internally joined; use continuity mode to select a pair that is open when released and closed when pressed. Never put the button directly across 3V3 and GND.
+The button is an active-low **pushbutton**, per the student's latest choice. Lab 3 specifies a debouncing capacitor; use the course's nonpolarized 0.15 µF capacitor **between PB10/D4 and GND, in parallel with the button**, as shown on the [complete diagram](docs/full_breadboard_wiring.png). The firmware also debounces the input in software. On a four-leg tactile button, some legs are internally joined; use continuity mode to select a pair that is open when released and closed when pressed. Never put the button directly across 3V3 and GND.
 
 The pot must first enter its low region (ADC 0–1228) to arm one local request. Moving it high (2867–4095) while the button is pressed triggers one request. Holding high does not repeat. The button is debounced for 25 ms. Releasing it cancels an active request. The raw light value is for observation only. `U` requests, `L` cancels, `?` sends status. The phone receives a line every second: `POT`, `DOOR`, `LIGHT`, `SOLENOID`. `SOLENOID=DISABLED` means PB5 is still forced low. The advertised name is `ENGS28-Safe-Kensa` if the startup AT sequence succeeds. The USB console also prints status once per second when no pulse is active.
 

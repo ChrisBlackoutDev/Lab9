@@ -4,7 +4,7 @@ This is the breadboard design prepared from the course Lab 9 handout. Final tran
 
 ## Schematics
 
-- [Potentiometer, LDR divider, and logic rail](low_voltage_inputs.png). For this prototype, replace the diagram's generic door switch contact with the [normally open pushbutton contact](pushbutton.svg): PB10/D4 to GND when pressed.
+- [Complete breadboard circuit](full_breadboard_wiring.png), including the Lab 2/Lab 3 nonpolarized 0.15 µF capacitor across the door-position pushbutton: PB10/D4 to GND when pressed.
 - [Bluefruit UART, flow control, MOD, and power](ble_wiring.png).
 - [Original Lab 3 KSC2073 solenoid driver](lab3_driver.png). The coil's external positive rail is separate from 3V3; its actual supply, resistor, part polarity, and pulse limit remain unverified. Do not energize it from this drawing alone.
 

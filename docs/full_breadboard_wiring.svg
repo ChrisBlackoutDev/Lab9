@@ -51,6 +51,14 @@
   <!-- Pushbutton -->
   <text class="label" x="1080" y="277">D4 / PB10</text>
   <line class="signal" x1="1100" y1="312" x2="1220" y2="312"/>
+  <line class="signal" x1="1100" y1="312" x2="1040" y2="312"/>
+  <line class="signal" x1="1040" y1="312" x2="1040" y2="225"/>
+  <line class="signal" x1="1040" y1="225" x2="1450" y2="225"/>
+  <line class="signal" x1="1450" y1="225" x2="1450" y2="342"/>
+  <line class="signal" x1="1422" y1="342" x2="1478" y2="342"/>
+  <line class="ground" x1="1422" y1="357" x2="1478" y2="357"/>
+  <line class="ground" x1="1450" y1="357" x2="1450" y2="430"/>
+  <text class="small" x="1360" y="290">0.15 µF</text>
   <circle cx="1220" cy="312" r="7" fill="#253143"/>
   <circle cx="1300" cy="312" r="7" fill="#253143"/>
   <line class="ground" x1="1225" y1="304" x2="1288" y2="278"/>
@@ -58,7 +66,7 @@
   <line class="ground" x1="1380" y1="312" x2="1380" y2="430"/>
   <text class="small" x="1082" y="364">Pushbutton, normally open pair</text>
   <text class="small" x="1082" y="390">Pressed = simulated CLOSED</text>
-  <text class="small" x="1082" y="413">MCU internal pull-up; no 3V3 wire</text>
+  <text class="small" x="1082" y="413">MCU internal pull-up; cap to GND</text>
 
   <!-- BLE section -->
   <rect class="panel" x="30" y="505" width="1540" height="383"/>
