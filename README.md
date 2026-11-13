@@ -18,6 +18,8 @@ The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing
 
 The [illustrated breadboard layout](docs/breadboard_layout.png) shows the components and colored jumpers in the style of the lab figures. The [complete circuit schematic](docs/full_breadboard_wiring.png) shows the same electrical connections. The illustrated placement is a guide rather than a literal hole-by-hole template; verify your breadboard's actual row and power-rail breaks before connecting power.
 
+Share the [group I/O pinout](docs/group_pinout.md) for the final-project check-in; it lists every allocated pin, signal direction, and sampling or command behavior.
+
 | Part | Arduino pin | MCU pin | Configuration |
 |---|---|---|---|
 | Pot wiper | A3 | PB1 | ADC channel 18; outer legs 3V3 and GND |
