@@ -1,17 +1,18 @@
 # ENGS 28 Lab 9 breadboard prototype
 
-Target: NUCLEO-C031C6 with Adafruit Bluefruit LE UART Friend. This is a separate project copy; Lab 8 is untouched. The default build keeps PB5 solenoid drive **off** and shows an allowed unlock request on the on-board LED for 150 ms. It is compiled but has not been flashed or electrically tested.
+Target: NUCLEO-C031C6 with Adafruit Bluefruit LE UART Friend. This is a separate project copy; Lab 8 is untouched. The default build keeps PB5 solenoid drive **off** and shows an allowed unlock request on the on-board LED for 1 second. The breadboard prototype was tested on the connected Nucleo on 2026-11-12 with a separate 300 ms coil build.
 
 ## Build
 
 ```sh
 make all          # integrated prototype, build/Lab9Prototype.bin
+make coil         # tested 300 ms solenoid pulse, build/coil/Lab9Prototype.bin
 make passthrough  # Day 17 two-way UART exercise, build/Passthrough.bin
 cc -std=c11 -Wall -Wextra -Werror -ISrc Src/SafeLogic.c tests/test_safe_logic.c -o /tmp/lab9_safe_logic_test
 /tmp/lab9_safe_logic_test
 ```
 
-The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing 12 MHz course clock setup. Flash only after confirming the actual Nucleo target and USB device. No ST-LINK board was present during preparation.
+The Makefile uses the installed STM32CubeIDE GCC 14.3 toolchain and the existing 12 MHz course clock setup. The connected ST-LINK reported a NUCLEO-C031C6, and the board is currently flashed with the verified `build/coil/Lab9Prototype.bin`. `make all` remains the coil-disabled test build.
 
 ## Pins and behavior
 
@@ -33,7 +34,7 @@ The button is an active-low **pushbutton**, per the student's latest choice. Lab
 
 The pot must first enter its low region (ADC 0–1228) to arm one local request. Moving it high (2867–4095) while the button is pressed triggers one request. Holding high does not repeat. The button is debounced for 25 ms. Releasing it cancels an active request. The raw light value is for observation only. `U` requests, `L` cancels, `?` sends status. The phone receives a line every second: `POT`, `DOOR`, `LIGHT`, `SOLENOID`. `SOLENOID=DISABLED` means PB5 is still forced low. The advertised name is `ENGS28-Safe-Kensa` if the startup AT sequence succeeds. The USB console also prints status once per second when no pulse is active.
 
-The default code does not claim a physically locked door: the pushbutton simulates door position, while the solenoid only retracts a latch. To enable a real coil pulse later, first verify the exact coil supply and duty rating, KSC2073 pinout, base resistor, built-in diode polarity, external supply, and ground arrangement against the actual parts and Lab 3 figure. Only then build with `make -B BUILD=build/coil COIL_PULSE_MS=<verified_duration_in_ms> all`; use that separate output for flashing. Keep the separate coil supply disconnected during input and BLE tests. The LED is useful feedback; the Lab 9 handout does not establish that it qualifies as the required second actuator for the final graded project.
+The pushbutton simulates door position, while the solenoid retracts a latch. The student confirmed the Lab 3 9 V DC adapter and driver wiring: barrel board `VIN` to solenoid red, solenoid black to KSC2073 collector, emitter to shared GND, and D6/PB5 through 150 Ω to the base. The barrel board's `5V` pin is unused for the solenoid. A 300 ms pulse moved the latch in the powered bench tests; `make coil` reproduces that build. The coil's current and long-term duty rating have not been measured. Unplug the 9 V adapter when not actively demonstrating the prototype. The LED is useful feedback; the Lab 9 handout does not establish that it qualifies as the required second actuator for the final graded project.
 
 ## Source map
 
@@ -48,12 +49,12 @@ The default code does not claim a physically locked door: the pushbutton simulat
 
 Class archive: `/home/kensa/Downloads/courseinfo/ENGS28_course_archive`; Lab 9 and Day 17 PDFs are also in the handoff ZIP. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
 
-## Physical checkpoints
+## Bench verification
 
-1. **USB and external coil supply unplugged:** verify the pushbutton contact pair, then connect one contact to D4/PB10 and the other to GND. Keep all coil power disconnected. See [pushbutton schematic](docs/pushbutton.svg). Inspect actual button legs before power.
-2. Add the pot and LDR divider to the 3V3 logic rail following [low-voltage schematic](docs/low_voltage_inputs.png). Check divider node and rail breaks with a meter. Reconnect only USB and observe raw console readings.
-3. Wire the Bluefruit per [BLE diagram](docs/ble_wiring.png), then flash the passthrough target and verify both UART directions with terminal/phone. Flash the integrated target only after that baseline.
-4. Use `U`, `L`, `?` with coil supply still disconnected and confirm LED and status. Collect real screenshots/readings.
-5. Assemble the Lab 3 transistor driver only after part and supply verification using [Lab 3 driver figure](docs/lab3_driver.png). Set a verified pulse value, build, flash, and test one observed coil pulse.
+- The ST-LINK identified the NUCLEO-C031C6 and flashed both the coil-disabled build and the separate 300 ms coil build with successful readback verification.
+- USB status showed the door button change `NOT_CLOSED → CLOSED → NOT_CLOSED`, pot readings span `0–4095`, and the LDR reading fell from about `2850` to `1280` when covered.
+- A Linux BLE central found and connected to `ENGS28-Safe-Kensa`, received status, and got both a rejected unlock with the button released and an accepted unlock with it pressed.
+- LD4 lit during a one-second coil-disabled request. With the coil supply unplugged, debugger reads confirmed PB5 high during the 300 ms pulse and low afterward.
+- With the 9 V adapter connected, the student observed the solenoid move for a USB `U` command, the local pot low-to-high request, and a BLE `U` command. The powered BLE test also returned `UNLOCK PULSE`; debugger reads showed PB5 high only during the pulse.
 
-`prototype_progress.md` tracks what has actually been verified. No physical checkpoint has been claimed complete.
+`prototype_progress.md` holds the detailed test record and remaining measurements.

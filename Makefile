@@ -19,6 +19,8 @@ PROTOTYPE := $(OBJECTS) $(BUILD)/Library/ADC.o $(BUILD)/Library/ble.o $(BUILD)/S
 
 all: $(BUILD)/Lab9Prototype.bin
 passthrough: $(BUILD)/Passthrough.bin
+coil:
+	$(MAKE) -B BUILD=build/coil COIL_PULSE_MS=300 all
 
 $(BUILD)/Lab9Prototype.elf: $(BUILD)/Src/Lab9Prototype.o $(PROTOTYPE) STM32C031C6TX_FLASH.ld
 	$(CC) $(LDFLAGS) -Wl,-Map=$(@:.elf=.map) $(filter %.o,$^) -Wl,--start-group -lc -lm -Wl,--end-group -o $@
@@ -39,4 +41,4 @@ $(BUILD)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-.PHONY: all passthrough
+.PHONY: all passthrough coil

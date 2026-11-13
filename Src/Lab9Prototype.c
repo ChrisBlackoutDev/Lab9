@@ -17,7 +17,7 @@
 #define LED_PIN (1U << 5)
 #define SAMPLE_MS 20U
 #define STATUS_MS 1000U
-#define LED_ONLY_FEEDBACK_MS 150U
+#define LED_ONLY_FEEDBACK_MS 1000U
 
 /* Keep this zero until the actual coil rating, supply and driver are verified. */
 #ifndef SOLENOID_PULSE_MS
