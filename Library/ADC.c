@@ -68,11 +68,9 @@ void adc_setChannel(unsigned int chNum) {
 }
 
 void adc_init(void) {
-    // Turn on the GPIO and ADC clocks, then make A0, A1 and A3 analog inputs.
-    RCC->IOPENR = RCC->IOPENR | RCC_IOPENR_GPIOAEN | RCC_IOPENR_GPIOBEN;
+    // Turn on the GPIO and ADC clocks, then make A3 an analog input.
+    RCC->IOPENR = RCC->IOPENR | RCC_IOPENR_GPIOBEN;
     /* GPIO analog mode is 11 in each pin's two mode bits. */
-    GPIOA->MODER = GPIOA->MODER | GPIO_MODER_MODE0_Msk;
-    GPIOA->MODER = GPIOA->MODER | GPIO_MODER_MODE1_Msk;
     GPIOB->MODER = GPIOB->MODER | GPIO_MODER_MODE1_Msk;
     RCC->APBENR2 = RCC->APBENR2 | RCC_APBENR2_ADCEN;
 
@@ -94,7 +92,7 @@ void adc_init(void) {
     // Rearm the ADC after long gaps between one-second readings.
     ADC1->CFGR2 = ADC1->CFGR2 | ADC_CFGR2_LFTRIG;
     adc_setWidth(0);
-    adc_setChannel(0);
+    adc_setChannel(18);
     ADC1->ISR = ADC_ISR_ADRDY;
     ADC1->CR = ADC1->CR | ADC_CR_ADEN;
     if (!wait_for_set(&ADC1->ISR, ADC_ISR_ADRDY)) {

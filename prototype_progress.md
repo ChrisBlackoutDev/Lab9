@@ -1,5 +1,11 @@
 # Prototype progress
 
+## 2026-11-15 photoresistor removal
+
+- The group decided not to use the photoresistor. The firmware now samples only the potentiometer on A3/PB1, no longer configures A0/PA0 for ADC, and omits `LIGHT` from USB/BLE status. The lock inputs remain the pushbutton, pot gesture, and BLE/USB `U` command.
+- A0/PA0 and the photoresistor's 10 kΩ divider resistor should be disconnected from the breadboard. Earlier LDR measurements below describe the previous build.
+- `make test`, `make hold`, and `make all` passed. The updated hold build was flashed to the NUCLEO-C031C6 with readback verification. A USB `?` status line showed `POT=4095 BUTTON=RELEASED REQUEST=LOCK SOLENOID=OFF` with no `LIGHT` field. The board was left locked/off; no powered solenoid test was performed for this change.
+
 ## 2026-11-15 sustained toggle build
 
 - Reviewed `/home/kensa/Downloads/codethatworks/CodingChallenge.c`. Its solenoid output uses D6/PB5 held HIGH while `Open` is true and LOW while false; it has no PWM or pulse timer. Its D5/PB4 button wiring cannot be copied because Lab 9 assigns PB4 to Bluefruit CTS. The Lab 9 output branch already implemented the held PB5 behavior behind `SOLENOID_HOLD_ENABLED`; `make hold` now builds it explicitly.

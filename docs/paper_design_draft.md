@@ -21,14 +21,14 @@ The complete pin list and configuration are in the project [README](../README.md
 
 ## Peripherals and software plan
 
-Peripherals: ADC1 channels 18 and 0, USART1 at 9600 baud with hardware RTS/CTS, USART2 at 9600 baud for the USB console, GPIO for PB10/PB5/PA5/PB0, and the course SysTick millisecond helper. The current version polls UART and ADC; SysTick is the only interrupt. The Lab 9 handout gives one additional point for an interrupt-driven UART driver, which can be added after polling works on hardware.
+Peripherals: ADC1 channel 18, USART1 at 9600 baud with hardware RTS/CTS, USART2 at 9600 baud for the USB console, GPIO for PB10/PB5/PA5/PB0, and the course SysTick millisecond helper. The current version polls UART and ADC; SysTick is the only interrupt. The Lab 9 handout gives one additional point for an interrupt-driven UART driver, which can be added after polling works on hardware.
 
 ```text
 Boot: PB5 off, LED off; configure GPIO and ADC; initialize USART2 and USART1.
       Put Bluefruit in CMD mode, send factory reset, device name, ATZ;
       wait for bounded responses, then return to UART mode.
 Repeat:
-      Every 20 ms: read pot and LDR; debounce the pushbutton;
+      Every 20 ms: read pot; debounce the pushbutton;
                    toggle on a new button press or a low-to-high pot turn.
       If a BLE or USB character is waiting: U toggles, L requests lock,
                  and ? returns status.

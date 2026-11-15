@@ -64,7 +64,7 @@
   <!-- Nucleo left pin nodes -->
   <g class="ring">
     <circle cx="1088" cy="365" r="13"/><circle cx="1088" cy="408" r="13"/>
-    <circle cx="1088" cy="505" r="13"/><circle cx="1088" cy="649" r="13"/>
+    <circle cx="1088" cy="505" r="13"/>
     <circle cx="1088" cy="934" r="13"/><circle cx="1088" cy="1137" r="13"/>
     <circle cx="1088" cy="1420" r="13"/>
   </g>
@@ -72,7 +72,6 @@
     <text x="1124" y="373">3V3</text>
     <text x="1124" y="416">GND</text>
     <text x="1124" y="513">A3 / PB1</text>
-    <text x="1124" y="657">A0 / PA0</text>
     <text x="1124" y="942">D4 / PB10</text>
     <text x="1124" y="1145">D6 / PB5</text>
     <text x="1124" y="1428">GND</text>
@@ -112,23 +111,10 @@
   <path class="wire black" d="M235 552 L175 552 L175 325"/>
   <path class="wire green" d="M498 505 L521 505 L521 376 L996 376 L996 505 L1075 505"/>
 
-  <!-- LDR and resistor divider -->
-  <text class="part" x="603" y="426">LIGHT SENSOR</text>
-  <rect x="632" y="445" width="145" height="97" rx="15" fill="#d4a354" stroke="#775328" stroke-width="5" filter="url(#shadow)"/>
-  <path d="M656 472 Q686 451 706 478 T754 480 M653 510 Q685 487 707 510 T753 511" fill="none" stroke="#76452b" stroke-width="6"/>
-  <path class="wire red" d="M705 445 L705 273"/>
-  <path class="wire green" d="M705 542 L705 649 L1075 649"/>
-  <circle cx="705" cy="649" r="11" fill="#159661"/>
-  <rect x="649" y="708" width="112" height="52" rx="19" fill="#e2c395" stroke="#8a6d4c" stroke-width="4"/>
-  <line x1="671" y1="710" x2="671" y2="758" stroke="#89421d" stroke-width="9"/>
-  <line x1="694" y1="710" x2="694" y2="758" stroke="#111827" stroke-width="9"/>
-  <line x1="717" y1="710" x2="717" y2="758" stroke="#bb251e" stroke-width="9"/>
-  <text class="small" x="769" y="744">10 kΩ</text>
-  <path class="wire green" d="M705 649 L705 707"/>
-  <path class="wire black" d="M705 761 L705 784 L553 784 L553 325"/>
+  <text class="small" x="601" y="655">A0 / PA0 unused</text>
 
   <!-- Pushbutton across central gap; capacitor in parallel -->
-  <text class="part" x="240" y="810">DOOR-STATE PUSHBUTTON</text>
+  <text class="part" x="240" y="810">TOGGLE PUSHBUTTON</text>
   <rect x="297" y="823" width="253" height="121" rx="16" fill="#1f2937" stroke="#111827" stroke-width="5" filter="url(#shadow)"/>
   <rect x="346" y="818" width="154" height="117" rx="16" fill="#c93d38" stroke="#832323" stroke-width="5"/>
   <circle cx="284" cy="850" r="10" fill="#293240"/><circle cx="563" cy="921" r="10" fill="#3072db"/>
@@ -138,7 +124,7 @@
   <text class="small" x="815" y="1037">0.15 µF</text>
   <path class="wire blue" d="M849 934 L849 1002"/>
   <path class="wire black" d="M849 1055 L849 1072 L283 1072 L283 850"/>
-  <text class="small" x="296" y="981">pressed = CLOSED</text>
+  <text class="small" x="296" y="981">each press toggles</text>
 
   <!-- Transistor driver, solenoid and power adapter -->
   <text class="part" x="219" y="1107">SOLENOID DRIVER</text>

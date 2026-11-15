@@ -16,11 +16,9 @@ void LockSafe(SafeState *state) {
     state->unlock_requested = false;
 }
 
-void SampleSafe(SafeState *state, uint32_t now, bool button_pressed,
-                uint16_t pot, uint16_t light) {
+void SampleSafe(SafeState *state, uint32_t now, bool button_pressed, uint16_t pot) {
     bool toggle = false;
     state->pot = pot;
-    state->light = light;
 
     if (!state->button_initialized) {
         /* An already-held button at boot is not a new press. */

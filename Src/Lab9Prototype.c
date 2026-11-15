@@ -2,7 +2,6 @@
  * ENGS 28 Lab 9 breadboard prototype
  *
  * A3 / PB1: potentiometer wiper, ADC channel 18
- * A0 / PA0: light divider, ADC channel 0
  * D4 / PB10: active-low toggle pushbutton with pull-up
  * D6 / PB5: solenoid transistor drive
  * D13 / PA5: on-board user LED
@@ -22,7 +21,6 @@
 #include "SafeLogic.h"
 
 #define POT_CHANNEL 18U
-#define LIGHT_CHANNEL 0U
 #define BUTTON_BITNUM 10U
 #define BUTTON_BITMASK (1U << BUTTON_BITNUM)
 #define SOLENOID_BITNUM 5U
@@ -68,7 +66,7 @@ static void ApplyOutputs(const SafeState *state) {
 
 static int ReadADC(unsigned int channel) {
     adc_setChannel(channel);
-    /* Lab 8 sensor check discarded the first reading after channel change. */
+    /* Lab 8 sensor check discarded the first ADC reading. */
     if (adc_getValue() < 0) {
         return -1;
     }
@@ -77,10 +75,9 @@ static int ReadADC(unsigned int channel) {
 
 static void SendStatus(const SafeState *state) {
     char line[STATUS_LINE_CAPACITY] = {0};
-    (void)snprintf(line, sizeof(line), "POT=%u BUTTON=%s LIGHT=%u REQUEST=%s SOLENOID=%s\r\n",
+    (void)snprintf(line, sizeof(line), "POT=%u BUTTON=%s REQUEST=%s SOLENOID=%s\r\n",
                    (unsigned int)state->pot,
                    state->button_pressed ? "PRESSED" : "RELEASED",
-                   (unsigned int)state->light,
                    state->unlock_requested ? "UNLOCK" : "LOCK",
 #if SOLENOID_HOLD_ENABLED > 0U
                    state->unlock_requested ? "ON" : "OFF"
@@ -133,12 +130,11 @@ int main(void) {
         if ((uint32_t)(now - last_sample) >= SAMPLE_MS) {
             last_sample = now;
             int pot = ReadADC(POT_CHANNEL);
-            int light = ReadADC(LIGHT_CHANNEL);
-            if (pot < 0 || light < 0) {
+            if (pot < 0) {
                 LockSafe(&state);
             } else {
                 bool pressed = (GPIOB->IDR & BUTTON_BITMASK) == 0U;
-                SampleSafe(&state, now, pressed, (uint16_t)pot, (uint16_t)light);
+                SampleSafe(&state, now, pressed, (uint16_t)pot);
             }
             ApplyOutputs(&state);
         }

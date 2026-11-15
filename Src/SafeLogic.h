@@ -12,12 +12,10 @@ typedef struct {
     bool pot_armed;
     uint32_t button_changed_at;
     uint16_t pot;
-    uint16_t light;
 } SafeState;
 
 void InitializeSafe(SafeState *state, uint32_t now);
-void SampleSafe(SafeState *state, uint32_t now, bool button_pressed,
-                uint16_t pot, uint16_t light);
+void SampleSafe(SafeState *state, uint32_t now, bool button_pressed, uint16_t pot);
 bool ProcessSafeCommand(SafeState *state, char command);
 void LockSafe(SafeState *state);
 
