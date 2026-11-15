@@ -1,4 +1,13 @@
-# Prototype progress — 2026-11-12
+# Prototype progress
+
+## 2026-11-15 toggle update
+
+- Replaced the door-button interlock and 300 ms request pulse with independent toggle requests: each debounced button press, each low-to-high pot turn, and each BLE/USB `U` changes the requested state. `L` forces lock; `?` reports status. The light reading remains telemetry only.
+- Built and passed the host toggle/debounce test (`make test`) and the MCU build (`make all`). Flashed the **coil-disabled** image to the connected NUCLEO-C031C6; STM32CubeProgrammer verified the write and reset the board.
+- USB status reported `REQUEST=LOCK/UNLOCK` and `SOLENOID=DISABLED`. Two USB `U` commands changed `LOCK → UNLOCK → LOCK` while the button was released. The student confirmed LD4 alternated when pressing the button and turning the pot.
+- External 9 V power remained unplugged. The installed coil's exact model and continuous-duty rating are unknown, and a visually similar online product does not identify it. Do not enable a sustained coil output or connect 9 V for this firmware until the actual part and rating are verified.
+
+## 2026-11-12 pulse prototype
 
 - Board: ST-LINK identified NUCLEO-C031C6 / STM32C03x, 32 KB flash, 3.24 V target voltage. The ST-LINK USB virtual COM port was available during the test.
 - Source and build: `make -B all passthrough`, `make coil`, and the host `SafeLogic` test passed. The default `make all` binary leaves PB5 low. `make coil` builds a separate 300 ms pulse binary.

@@ -5,23 +5,20 @@
 #include <stdint.h>
 
 typedef struct {
-    bool door_closed;
-    bool door_candidate;
+    bool unlock_requested;
+    bool button_raw;
     bool button_pressed;
+    bool button_initialized;
     bool pot_armed;
-    bool pulse_active;
-    bool sensor_valid;
-    uint32_t door_candidate_since;
-    uint32_t pulse_started;
+    uint32_t button_changed_at;
     uint16_t pot;
     uint16_t light;
 } SafeState;
 
 void InitializeSafe(SafeState *state, uint32_t now);
 void SampleSafe(SafeState *state, uint32_t now, bool button_pressed,
-                 uint16_t pot, uint16_t light, uint32_t pulse_ms);
-bool ProcessSafeCommand(SafeState *state, char command, uint32_t now);
-void ExpireSafe(SafeState *state, uint32_t now, uint32_t pulse_ms);
-void CancelSafe(SafeState *state);
+                uint16_t pot, uint16_t light);
+bool ProcessSafeCommand(SafeState *state, char command);
+void LockSafe(SafeState *state);
 
 #endif

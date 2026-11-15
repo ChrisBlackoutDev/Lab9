@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="310" viewBox="0 0 900 310" role="img" aria-label="Pushbutton between Nucleo PB10 D4 and ground, with internal pull up">
   <rect width="900" height="310" fill="white"/>
-  <text x="40" y="55" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#19387f">Door-position pushbutton (3.3 V logic)</text>
+  <text x="40" y="55" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#19387f">Toggle pushbutton (3.3 V logic)</text>
   <text x="40" y="94" font-family="Arial, sans-serif" font-size="18" fill="#374151">Pressed = simulated CLOSED. Released = NOT_CLOSED.</text>
   <line x1="175" y1="184" x2="363" y2="184" stroke="#2754c7" stroke-width="5"/>
   <circle cx="175" cy="184" r="9" fill="#2754c7"/>

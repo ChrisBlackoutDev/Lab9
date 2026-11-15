@@ -1,44 +1,58 @@
 #include <assert.h>
+
 #include "SafeLogic.h"
 
 int main(void) {
     SafeState state = {0};
     InitializeSafe(&state, 0);
-    assert(!ProcessSafeCommand(&state, 'U', 0)); /* No sensor sample yet. */
-    SampleSafe(&state, 0, false, 4095, 0, 100);
-    assert(!state.pulse_active); /* Boot high cannot unlock. */
+    assert(!state.unlock_requested);
 
-    SampleSafe(&state, 10, true, 0, 0, 100);
-    SampleSafe(&state, 40, true, 0, 0, 100);
-    assert(state.door_closed && state.pot_armed);
-    SampleSafe(&state, 60, true, 4095, 0, 100);
-    assert(state.pulse_active);
-    SampleSafe(&state, 80, true, 4095, 0, 100);
-    assert(state.pulse_active); /* Holding high does not retrigger. */
-    ExpireSafe(&state, 160, 100);
-    assert(!state.pulse_active);
-    SampleSafe(&state, 180, true, 4095, 0, 100);
-    assert(!state.pulse_active);
+    /* Inputs already held or high at boot do not request an unlock. */
+    SampleSafe(&state, 20, true, 4095, 100);
+    SampleSafe(&state, 60, true, 4095, 100);
+    assert(!state.unlock_requested);
+    assert(state.light == 100);
 
-    assert(ProcessSafeCommand(&state, 'U', 190));
-    assert(state.pulse_active);
-    SampleSafe(&state, 200, false, 4095, 0, 100);
-    assert(!state.pulse_active);
-    assert(!ProcessSafeCommand(&state, 'U', 201));
-    SampleSafe(&state, 230, false, 4095, 0, 100);
-    assert(!state.door_closed && !state.pulse_active);
-    assert(!ProcessSafeCommand(&state, 'U', 240));
+    SampleSafe(&state, 80, false, 4095, 100);
+    SampleSafe(&state, 120, false, 4095, 100);
+    SampleSafe(&state, 140, true, 4095, 100);
+    SampleSafe(&state, 180, true, 4095, 100);
+    assert(state.unlock_requested);
+    SampleSafe(&state, 220, true, 4095, 100);
+    assert(state.unlock_requested);
+    SampleSafe(&state, 240, false, 4095, 100);
+    SampleSafe(&state, 280, false, 4095, 100);
+    SampleSafe(&state, 300, true, 4095, 100);
+    SampleSafe(&state, 340, true, 4095, 100);
+    assert(!state.unlock_requested);
 
-    /* A high pot while open is consumed, so closing later cannot surprise-unlock. */
-    SampleSafe(&state, 245, false, 0, 0, 100);
-    SampleSafe(&state, 246, false, 4095, 0, 100);
-    SampleSafe(&state, 250, true, 4095, 0, 100);
-    SampleSafe(&state, 280, true, 4095, 0, 100);
-    assert(!state.pulse_active);
+    SampleSafe(&state, 360, true, 0, 100);
+    SampleSafe(&state, 380, true, 4095, 100);
+    assert(state.unlock_requested);
+    SampleSafe(&state, 400, true, 4095, 100);
+    assert(state.unlock_requested);
+    SampleSafe(&state, 420, true, 0, 100);
+    SampleSafe(&state, 440, true, 4095, 100);
+    assert(!state.unlock_requested);
 
-    SampleSafe(&state, 281, true, 0, 0, 100);
-    assert(ProcessSafeCommand(&state, 'U', 290));
-    assert(ProcessSafeCommand(&state, 'L', 291));
-    assert(!state.pulse_active);
+    assert(ProcessSafeCommand(&state, 'U'));
+    assert(state.unlock_requested);
+    assert(ProcessSafeCommand(&state, 'u'));
+    assert(!state.unlock_requested);
+    assert(ProcessSafeCommand(&state, 'U'));
+    assert(ProcessSafeCommand(&state, 'L'));
+    assert(!state.unlock_requested);
+    assert(!ProcessSafeCommand(&state, '?'));
+
+    /* A pot turn and button press in one sample produce one toggle. */
+    SampleSafe(&state, 460, false, 0, 100);
+    SampleSafe(&state, 500, false, 0, 100);
+    SampleSafe(&state, 520, true, 0, 100);
+    assert(!state.unlock_requested);
+    SampleSafe(&state, 560, true, 4095, 100);
+    assert(state.unlock_requested);
+
+    LockSafe(&state);
+    assert(!state.unlock_requested);
     return 0;
 }

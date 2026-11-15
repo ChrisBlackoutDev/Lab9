@@ -1,8 +1,5 @@
 /*
- * Breadboard safe interlock and request timing
- *
- * No GPIO is accessed here; the caller supplies the button and ADC readings.
- * The 25 ms button debounce follows the earlier Lab 3 lock program.
+ * Breadboard lock request logic; the caller supplies button and ADC readings.
  */
 #include "SafeLogic.h"
 
@@ -12,66 +9,53 @@
 
 void InitializeSafe(SafeState *state, uint32_t now) {
     *state = (SafeState){0};
-    state->door_candidate_since = now;
+    state->button_changed_at = now;
 }
 
-void CancelSafe(SafeState *state) {
-    state->pulse_active = false;
-}
-
-void ExpireSafe(SafeState *state, uint32_t now, uint32_t pulse_ms) {
-    if (state->pulse_active && (uint32_t)(now - state->pulse_started) >= pulse_ms) {
-        CancelSafe(state);
-    }
-}
-
-static bool RequestSafe(SafeState *state, uint32_t now) {
-    if (!state->sensor_valid || !state->door_closed || !state->button_pressed ||
-        state->pulse_active) {
-        return false;
-    }
-    state->pulse_active = true;
-    state->pulse_started = now;
-    return true;
+void LockSafe(SafeState *state) {
+    state->unlock_requested = false;
 }
 
 void SampleSafe(SafeState *state, uint32_t now, bool button_pressed,
-                 uint16_t pot, uint16_t light, uint32_t pulse_ms) {
+                uint16_t pot, uint16_t light) {
+    bool toggle = false;
     state->pot = pot;
     state->light = light;
-    state->sensor_valid = true;
-    state->button_pressed = button_pressed;
-    ExpireSafe(state, now, pulse_ms);
-    if (!button_pressed) {
-        /* A released interlock is unsafe immediately; only pressing is debounced. */
-        state->door_closed = false;
-        state->door_candidate = false;
-        state->door_candidate_since = now;
-        CancelSafe(state);
-    } else if (button_pressed != state->door_candidate) {
-        /* Restart the Lab 3 debounce timer when the raw button state changes. */
-        state->door_candidate = button_pressed;
-        state->door_candidate_since = now;
-    } else if (state->door_closed != state->door_candidate &&
-               (uint32_t)(now - state->door_candidate_since) >= BUTTON_DEBOUNCE_MS) {
-        state->door_closed = state->door_candidate;
+
+    if (!state->button_initialized) {
+        /* An already-held button at boot is not a new press. */
+        state->button_raw = button_pressed;
+        state->button_pressed = button_pressed;
+        state->button_initialized = true;
+    } else if (button_pressed != state->button_raw) {
+        state->button_raw = button_pressed;
+        state->button_changed_at = now;
+    } else if (state->button_pressed != state->button_raw &&
+               (uint32_t)(now - state->button_changed_at) >= BUTTON_DEBOUNCE_MS) {
+        state->button_pressed = state->button_raw;
+        toggle = state->button_pressed;
     }
 
     if (pot <= POT_LOW_MAX) {
         state->pot_armed = true;
     } else if (pot >= POT_HIGH_MIN && state->pot_armed) {
         state->pot_armed = false;
-        (void)RequestSafe(state, now);
+        toggle = true;
+    }
+
+    if (toggle) {
+        state->unlock_requested = !state->unlock_requested;
     }
 }
 
-bool ProcessSafeCommand(SafeState *state, char command, uint32_t now) {
-    if (command == 'L' || command == 'l') {
-        CancelSafe(state);
+bool ProcessSafeCommand(SafeState *state, char command) {
+    if (command == 'U' || command == 'u') {
+        state->unlock_requested = !state->unlock_requested;
         return true;
     }
-    if (command == 'U' || command == 'u') {
-        return RequestSafe(state, now);
+    if (command == 'L' || command == 'l') {
+        LockSafe(state);
+        return true;
     }
     return false;
 }

@@ -6,11 +6,11 @@ CROSS_COMPILE := $(if $(TOOLCHAIN),$(TOOLCHAIN)/,)arm-none-eabi-
 CC := $(CROSS_COMPILE)gcc
 SIZE := $(CROSS_COMPILE)size
 OBJCOPY := $(CROSS_COMPILE)objcopy
+SOLENOID_HOLD_ENABLED ?= 0
 HOST_CC ?= cc
-BUILD ?= build
-COIL_PULSE_MS ?= 0
+BUILD ?= $(if $(filter 1,$(SOLENOID_HOLD_ENABLED)),build/hold,build)
 
-CPPFLAGS := -DSTM32C031xx -DNUCLEO_C031C6 -DSOLENOID_PULSE_MS=$(COIL_PULSE_MS) -Icourse/chipheaders/Device -Icourse/chipheaders/Include -Icourse/mylib -ILibrary -ISrc
+CPPFLAGS := -DSTM32C031xx -DNUCLEO_C031C6 -DSOLENOID_HOLD_ENABLED=$(SOLENOID_HOLD_ENABLED) -Icourse/chipheaders/Device -Icourse/chipheaders/Include -Icourse/mylib -ILibrary -ISrc
 CFLAGS := -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -std=gnu11 -Og -g3 -Wall -Wextra -MMD -MP -ffunction-sections -fdata-sections
 LDFLAGS := -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft -TSTM32C031C6TX_FLASH.ld --specs=nano.specs --specs=nosys.specs -Wl,--gc-sections
 
@@ -24,8 +24,6 @@ all: $(BUILD)/Lab9Prototype.bin
 passthrough: $(BUILD)/Passthrough.bin
 test: $(BUILD)/test_safe_logic
 	$(BUILD)/test_safe_logic
-coil:
-	$(MAKE) -B BUILD=build/coil COIL_PULSE_MS=300 all
 
 $(BUILD)/test_safe_logic: Src/SafeLogic.c Src/SafeLogic.h tests/test_safe_logic.c
 	@mkdir -p $(dir $@)
@@ -50,4 +48,4 @@ $(BUILD)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-.PHONY: all passthrough test coil
+.PHONY: all passthrough test
