@@ -104,7 +104,7 @@
 
   <!-- Solenoid section -->
   <rect class="panel" x="30" y="912" width="1540" height="317"/>
-  <text class="section" x="55" y="952">3. Lab 3 low-side solenoid driver — keep 9 V unplugged for current toggle build</text>
+  <text class="section" x="55" y="952">3. Lab 3 low-side solenoid driver — PB5 HIGH for unlock, LOW for lock</text>
   <text class="label" x="75" y="1065">D6 / PB5</text>
   <line class="signal" x1="205" y1="1057" x2="325" y2="1057"/>
   <rect x="325" y="1028" width="215" height="58" rx="10" fill="#fff7e3" stroke="#a64712" stroke-width="3"/>

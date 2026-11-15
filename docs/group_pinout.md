@@ -1,6 +1,6 @@
 # Lab 9 smart-safe breadboard prototype: I/O pinout
 
-Board: **NUCLEO-C031C6**. The breadboard pushbutton is a toggle input, not a door or latch-position sensor. The 2026-11-12 hardware tests used an earlier 300 ms pulse build. The current toggle build was flashed on 2026-11-15 with the solenoid drive disabled because its continuous-duty rating is unknown.
+Board: **NUCLEO-C031C6**. The breadboard pushbutton is a toggle input, not a door or latch-position sensor. The 2026-11-12 hardware tests used an earlier 300 ms pulse build. The current hold build was flashed on 2026-11-15; its sustained output follows the requested state.
 
 ## Pins already assigned
 
@@ -11,7 +11,7 @@ Directions below are from the **Nucleo's** point of view. `D*` and `A*` are the 
 | A3 | PB1 | Analog input, ADC1 channel 18 | Potentiometer wiper. The other two pot terminals go to 3V3 and GND. A low-to-high turn toggles the lock request once. |
 | A0 | PA0 | Analog input, ADC1 channel 0 | LDR/10 kΩ divider midpoint. LDR goes to 3V3; 10 kΩ goes to GND. Light is reported as telemetry and does not currently control the lock. |
 | D4 | PB10 | Digital input with internal pull-up | Pushbutton to GND. Each debounced press toggles the request. A 0.15 µF capacitor is across PB10 and GND. |
-| D6 | PB5 | Digital output | Solenoid driver control through a 150 Ω resistor to the KSC2073 base. The current build forces PB5 LOW; the coil is never connected directly to PB5. |
+| D6 | PB5 | Digital output | Solenoid driver control through a 150 Ω resistor to the KSC2073 base. The hold build drives PB5 HIGH for unlock and LOW for lock; the coil is never connected directly to PB5. |
 | D13 | PA5 | Digital output | On-board LD4 user LED; HIGH while unlock is requested. No external LED wire is needed. |
 | D1 | PB6 | USART1 TX, AF0 | Nucleo transmit to Bluefruit **RXI**. |
 | D0 | PB7 | USART1 RX, AF0 | Nucleo receive from Bluefruit **TXO**. |
@@ -32,6 +32,6 @@ Directions below are from the **Nucleo's** point of view. `D*` and `A*` are the 
 - The pot must first read low (ADC **0–1228**) to arm. Moving it high (ADC **2867–4095**) toggles once. Holding it high does not repeat.
 - Bluefruit uses USART1 at **9600 baud** with RTS/CTS flow control. The USB console uses USART2 at **9600 baud**. Both UARTs are polled in the main loop. Wireless or USB `U` toggles; `L` forces a lock request; `?` requests status.
 - A **1 ms SysTick interrupt** supplies timing. Status (`POT`, `BUTTON`, `LIGHT`, `REQUEST`, `SOLENOID`) is sent over BLE every **1 second**. No ADC, button, or UART interrupt is used in this version.
-- `make all` builds the current coil-disabled toggle version. `REQUEST=UNLOCK` means LD4 is on; `SOLENOID=DISABLED` means the latch has not physically moved.
+- `make hold` builds the version currently flashed on the board. `REQUEST=UNLOCK` turns LD4 and PB5 on until the next toggle or `L`; `SOLENOID=ON/OFF` reports the commanded output, not a latch-position measurement. `make all` builds a separate coil-disabled version for unpowered bench checks.
 
 Source: [`Src/Lab9Prototype.c`](../Src/Lab9Prototype.c), [`Src/SafeLogic.c`](../Src/SafeLogic.c), [`Library/uart1.c`](../Library/uart1.c), and the [bench test record](../prototype_progress.md).

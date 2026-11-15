@@ -1,11 +1,18 @@
 # Prototype progress
 
+## 2026-11-15 sustained toggle build
+
+- Reviewed `/home/kensa/Downloads/codethatworks/CodingChallenge.c`. Its solenoid output uses D6/PB5 held HIGH while `Open` is true and LOW while false; it has no PWM or pulse timer. Its D5/PB4 button wiring cannot be copied because Lab 9 assigns PB4 to Bluefruit CTS. The Lab 9 output branch already implemented the held PB5 behavior behind `SOLENOID_HOLD_ENABLED`; `make hold` now builds it explicitly.
+- The student confirmed the friend project used the same solenoid, 9 V supply, and KSC2073 driver, and that the TAs approved sustained on-time. That approval and the coil's electrical rating were not independently inspected or measured here.
+- `make test` and `make hold` passed. STM32CubeProgrammer flashed `build/hold/Lab9Prototype.bin`, verified readback, and reset the NUCLEO-C031C6.
+- With the 9 V adapter still unplugged, USB serial commands `L`, `U`, `L` reported `REQUEST=LOCK SOLENOID=OFF`, `REQUEST=UNLOCK SOLENOID=ON`, and `REQUEST=LOCK SOLENOID=OFF`. A hot-plug debugger read of GPIOB ODR showed PB5 HIGH (`0x20`) after `U` and LOW (`0x00`) after `L`. The board was left in the locked/off state. Powered physical latch motion with this build remains unobserved.
+
 ## 2026-11-15 toggle update
 
 - Replaced the door-button interlock and 300 ms request pulse with independent toggle requests: each debounced button press, each low-to-high pot turn, and each BLE/USB `U` changes the requested state. `L` forces lock; `?` reports status. The light reading remains telemetry only.
 - Built and passed the host toggle/debounce test (`make test`) and the MCU build (`make all`). Flashed the **coil-disabled** image to the connected NUCLEO-C031C6; STM32CubeProgrammer verified the write and reset the board.
 - USB status reported `REQUEST=LOCK/UNLOCK` and `SOLENOID=DISABLED`. Two USB `U` commands changed `LOCK → UNLOCK → LOCK` while the button was released. The student confirmed LD4 alternated when pressing the button and turning the pot.
-- External 9 V power remained unplugged. The installed coil's exact model and continuous-duty rating are unknown, and a visually similar online product does not identify it. Do not enable a sustained coil output or connect 9 V for this firmware until the actual part and rating are verified.
+- External 9 V power remained unplugged for this earlier coil-disabled build. The installed coil's exact model and continuous-duty rating were unknown at that time; the later student confirmation and sustained-build flash are recorded above.
 
 ## 2026-11-12 pulse prototype
 

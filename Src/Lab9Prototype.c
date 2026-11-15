@@ -34,7 +34,7 @@
 #define STATUS_MS 1000U
 #define STATUS_LINE_CAPACITY 96U
 
-/* The supplied lock has no verified continuous-duty rating. */
+/* Keep the default bench build's coil output off. */
 #ifndef SOLENOID_HOLD_ENABLED
 #define SOLENOID_HOLD_ENABLED 0U
 #endif
@@ -56,6 +56,7 @@ static void InitializeGPIO(void) {
 
 static void ApplyOutputs(const SafeState *state) {
 #if SOLENOID_HOLD_ENABLED > 0U
+    /* Hold PB5 high until the next lock request, as in the supplied driver example. */
     GPIOB->BSRR = state->unlock_requested ? SOLENOID_BITMASK
                                          : (SOLENOID_BITMASK << GPIO_BSRR_RESET_BIT_OFFSET);
 #else

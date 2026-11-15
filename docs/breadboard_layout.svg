@@ -200,7 +200,7 @@
   <text class="small" x="1722" y="1231">Confirm the actual KSC2073 B–C–E orientation,</text>
   <text class="small" x="1722" y="1266">150 Ω base resistor, and 9 V DC adapter label.</text>
   <text class="small" x="1722" y="1301">Keep the 9 V rail separate from Nucleo 3V3.</text>
-  <text class="small" x="1722" y="1344">Current build: PB5 off; LD4 shows toggle state.</text>
+  <text class="small" x="1722" y="1344">Hold build: PB5 and LD4 follow toggle state.</text>
   <rect x="1685" y="1412" width="636" height="130" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
   <text class="small" x="1712" y="1450">Top red rail is 3V3; bottom orange rail is</text>
   <text class="small" x="1712" y="1481">external positive. The black jumper joins GND rails.</text>

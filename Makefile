@@ -21,6 +21,8 @@ PROTOTYPE := $(OBJECTS) $(BUILD)/Library/ADC.o $(BUILD)/Library/ble.o $(BUILD)/S
 -include $(OBJECTS:.o=.d) $(PROTOTYPE:.o=.d) $(BUILD)/Src/Lab9Prototype.d $(BUILD)/Src/Passthrough.d
 
 all: $(BUILD)/Lab9Prototype.bin
+hold:
+	$(MAKE) SOLENOID_HOLD_ENABLED=1 all
 passthrough: $(BUILD)/Passthrough.bin
 test: $(BUILD)/test_safe_logic
 	$(BUILD)/test_safe_logic
@@ -48,4 +50,4 @@ $(BUILD)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-.PHONY: all passthrough test
+.PHONY: all hold passthrough test

@@ -1,6 +1,6 @@
 # Lab 9 paper design draft
 
-This design began with the course Lab 9 handout and was then used for the 2026-11-12 breadboard test. The 9 V adapter, 150 Ω base resistor, and 300 ms pulse moved the latch during that test. The 2026-11-15 update uses independent button, pot, and BLE toggle requests with the coil output disabled. Coil current and long-term duty rating remain unmeasured. The final graded project still needs an instructor-approved second actuator.
+This design began with the course Lab 9 handout and was then used for the 2026-11-12 breadboard test. The 9 V adapter, 150 Ω base resistor, and 300 ms pulse moved the latch during that test. The 2026-11-15 update uses independent button, pot, and BLE toggle requests with PB5 held HIGH while unlocked and LOW while locked. The student reports that the same hardware and sustained on-time were TA-approved in a friend's project; coil current and long-term duty rating remain unmeasured here. The final graded project still needs an instructor-approved second actuator.
 
 ## Schematics
 
@@ -37,4 +37,4 @@ Repeat:
       Send one queued BLE character when USART1 can accept it.
 ```
 
-The default firmware uses a persistent LED indication and holds PB5 low. The pushbutton is a toggle input; no door or latch position is sensed. An indefinitely energized coil build needs the actual coil's continuous-duty rating before it can be flashed or powered.
+The default `make all` build uses a persistent LED indication and holds PB5 low. The `make hold` build currently flashed on the board keeps PB5 HIGH for the unlock state and LOW for the lock state. The pushbutton is a toggle input; no door or latch position is sensed. The current hold build has been checked with the 9 V supply unplugged; powered sustained operation on this board remains to be observed.
