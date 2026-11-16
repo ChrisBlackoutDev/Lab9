@@ -29,36 +29,37 @@ static void SetCommandMode(bool command_mode) {
 }
 
 static bool SendCommand(const char *command) {
-    uint32_t started = milliseconds();
-    for (const char *p = command; *p != '\0'; ++p) {
-        while (!uart1_tryWrite(*p)) {
-            if ((uint32_t)(milliseconds() - started) >= COMMAND_TIMEOUT_MS) {
+    uint32_t command_started = milliseconds();
+    for (const char *character = command; *character != '\0'; ++character) {
+        while (!uart1_tryWrite(*character)) {
+            if ((uint32_t)(milliseconds() - command_started) >= COMMAND_TIMEOUT_MS) {
                 return false;
             }
         }
     }
 
     /* The handout specifies response drain until 10-20 ms idle. */
-    bool received = false;
-    bool saw_ok = false;
-    int previous = -1;
+    bool received_response = false;
+    bool received_ok = false;
+    int previous_character = -1;
     uint32_t last_byte = milliseconds();
-    started = last_byte;
-    while ((uint32_t)(milliseconds() - started) < RESPONSE_TIMEOUT_MS) {
+    uint32_t response_started = last_byte;
+    while ((uint32_t)(milliseconds() - response_started) < RESPONSE_TIMEOUT_MS) {
         if (uart1_RxAvail()) {
-            int ch = uart1_read();
-            received = true;
+            int response_character = uart1_read();
+            received_response = true;
             last_byte = milliseconds();
-            if (previous == 'O' && ch == 'K') {
-                saw_ok = true;
+            if (previous_character == 'O' && response_character == 'K') {
+                received_ok = true;
             }
-            previous = ch;
-        } else if (received && (uint32_t)(milliseconds() - last_byte) >= RESPONSE_IDLE_MS) {
+            previous_character = response_character;
+        } else if (received_response &&
+                   (uint32_t)(milliseconds() - last_byte) >= RESPONSE_IDLE_MS) {
             break;
         }
     }
     delay_ms(COMMAND_SETTLE_MS);
-    return saw_ok;
+    return received_ok;
 }
 
 bool BLE_Init(void) {
@@ -69,16 +70,16 @@ bool BLE_Init(void) {
     uart1_init();
     delay_ms(COMMAND_STARTUP_MS);
 
-    bool okay = SendCommand("AT+FACTORYRESET\r\n");
-    if (okay) {
-        okay = SendCommand("AT+GAPDEVNAME=ENGS28-Safe-Kensa\r\n");
+    bool command_succeeded = SendCommand("AT+FACTORYRESET\r\n");
+    if (command_succeeded) {
+        command_succeeded = SendCommand("AT+GAPDEVNAME=ENGS28-Safe-Kensa\r\n");
     }
-    if (okay) {
-        okay = SendCommand("ATZ\r\n");
+    if (command_succeeded) {
+        command_succeeded = SendCommand("ATZ\r\n");
     }
     SetCommandMode(false);
     delay_ms(DATA_MODE_SETTLE_MS);
-    return okay;
+    return command_succeeded;
 }
 
 bool BLE_Queue(const char *message) {
@@ -89,8 +90,8 @@ bool BLE_Queue(const char *message) {
     if (length >= TX_CAPACITY) {
         return false;
     }
-    unsigned int used = (tx_head + TX_CAPACITY - tx_tail) % TX_CAPACITY;
-    if (length > TX_CAPACITY - 1U - used) {
+    unsigned int queued_length = (tx_head + TX_CAPACITY - tx_tail) % TX_CAPACITY;
+    if (length > TX_CAPACITY - 1U - queued_length) {
         /* A disconnected module must not leave a backlog of stale status. */
         tx_head = tx_tail;
     }

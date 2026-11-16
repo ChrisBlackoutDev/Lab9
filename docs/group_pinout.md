@@ -1,6 +1,6 @@
 # Lab 9 smart-safe breadboard prototype: I/O pinout
 
-Board: **NUCLEO-C031C6**. The breadboard pushbutton is a toggle input, not a door or latch-position sensor. The 2026-11-12 hardware tests used an earlier 300 ms pulse build. The current hold build was flashed on 2026-11-15; its sustained output follows the requested state.
+Board: **NUCLEO-C031C6**. The breadboard pushbutton is a toggle input, not a door or latch-position sensor. The 2026-11-12 hardware tests used an earlier 300 ms pulse build. The last flashed hold build has a sustained output that follows the requested state. The latest source refactor has not yet been flashed.
 
 ## Pins already assigned
 
@@ -31,6 +31,6 @@ Directions below are from the **Nucleo's** point of view. `D*` and `A*` are the 
 - The pot must first read low (ADC **0–1228**) to arm. Moving it high (ADC **2867–4095**) toggles once. Holding it high does not repeat.
 - Bluefruit uses USART1 at **9600 baud** with RTS/CTS flow control. The USB console uses USART2 at **9600 baud**. Both UARTs are polled in the main loop. Wireless or USB `U` toggles; `L` forces a lock request; `?` requests status.
 - A **1 ms SysTick interrupt** supplies timing. Status (`POT`, `BUTTON`, `REQUEST`, `SOLENOID`) is sent over BLE every **1 second**. No ADC, button, or UART interrupt is used in this version.
-- `make hold` builds the version currently flashed on the board. `REQUEST=UNLOCK` turns LD4 and PB5 on until the next toggle or `L`; `SOLENOID=ON/OFF` reports the commanded output, not a latch-position measurement. `make all` builds a separate coil-disabled version for unpowered bench checks.
+- `make hold` builds the sustained-output version. `REQUEST=UNLOCK` turns LD4 and PB5 on until the next toggle or `L`; `SOLENOID=ON/OFF` reports the commanded output, not a latch-position measurement. `make all` builds a separate coil-disabled version for unpowered bench checks.
 
 Source: [`Src/Lab9Prototype.c`](../Src/Lab9Prototype.c), [`Src/SafeLogic.c`](../Src/SafeLogic.c), [`Library/uart1.c`](../Library/uart1.c), and the [bench test record](../prototype_progress.md).

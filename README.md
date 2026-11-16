@@ -1,6 +1,6 @@
 # ENGS 28 Lab 9 breadboard prototype
 
-Target: NUCLEO-C031C6 with an Adafruit Bluefruit LE UART Friend. The button, a low-to-high pot turn, or a BLE/USB `U` command toggles a shared lock request. LD4 stays lit while unlock is requested. The **hold build currently flashed on the board** drives PB5 HIGH throughout the unlock state and LOW throughout the lock state. This is a breadboard prototype, with no door or latch-position sensor.
+Target: NUCLEO-C031C6 with an Adafruit Bluefruit LE UART Friend. The button, a low-to-high pot turn, or a BLE/USB `U` command toggles a shared lock request. LD4 stays lit while unlock is requested. The **last flashed hold build** drives PB5 HIGH throughout the unlock state and LOW throughout the lock state; the latest source refactor has not yet been flashed. This is a breadboard prototype, with no door or latch-position sensor.
 
 ## Build and test
 
@@ -50,15 +50,15 @@ The tested Lab 3 driver wiring used a 9 V DC adapter: barrel board `VIN` to sole
 
 | Source | Origin / change |
 |---|---|
-| `sysinit.c`, `uart.c`, board headers/startup | Copied from the local Lab 8 class project; `uart.c` is the supplied course UART driver plus the Day 17 `uart2_RxAvail()` addition |
-| `Library/ADC.*` | Reused from the tested Lab 8 project; follows the course `ADCPot.c` example for the pot channel, with calibration and bounded waits |
-| `Src/SafeLogic.c` | Lab 3-style button debounce on PB10, plus the local and BLE toggle logic |
-| `Src/Lab9Prototype.c` | Lab 3 PB5 output pattern, Lab 4 PB1 ADC, new main loop; the hold build sustains PB5 HIGH until a lock request, matching the supplied friend's `CodingChallenge.c` output behavior |
+| `sysinit.c`, `uart.c`, board headers/startup | Copied from the local Lab 8 class project; `uart.c` is the supplied course UART driver plus the Day 17 slide's `uart2_RxAvail()` addition |
+| `Library/ADC.*` | Course `ADCPot.c` single-channel setup adapted from PA0 to PB1/channel 18; tested Lab 8 calibration and bounded waits retained |
+| `Src/SafeLogic.c` | Day 4 press-edge toggle pattern and Lab 3 button wiring, with project-specific debounce, pot gesture, and shared request state |
+| `Src/Lab9Prototype.c` | Lab 3 PB5 solenoid output and Day 7 ADC reading pattern, combined with the Lab 9 main loop; the hold build sustains PB5 HIGH until a lock request, matching the supplied friend's `CodingChallenge.c` output behavior |
 | `Library/uart1.c` | New USART1 driver following the class USART2 driver and Day 17 slides; RTS/CTS added |
 | `Src/Passthrough.c` | Day 17 passthrough exercise adapted for nonblocking USART1 transmit |
 | `Library/ble.c` | Lab 9 section 4.4 startup sequence; bounded command waits and nonblocking data queue |
 
-The course source review checked the supplied `uart.c`, `button.c`, `ADCPot.c`, Day 17 BLE slides, and Lab 9 handout. The handouts and slides are not bundled here. They contain no supplied USART1 driver or BLE startup function; the Day 17 slides and Lab 9 handout direct students to write the USART1 and BLE parts. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
+The course source review checked the supplied `uart.c`, `button.c`, `ADCPot.c`, Day 4 button slides, Day 17 BLE slides, Lab 3 driver, and Lab 9 handout. The handouts and slides are not bundled here. They contain no supplied USART1 driver, BLE startup function, or pot/button/BLE lock state machine; the Day 17 slides and Lab 9 handout direct students to write the USART1 and BLE parts. The Bluefruit [manufacturer pinout](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/pinouts) confirms crossed RTS/CTS and MOD level; its [GAP command documentation](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/ble-gap) confirms the name syntax and reset.
 
 The `course/chipheaders` support files and ST-generated startup/linker files retain their upstream copyright and license notices. No project-wide license is specified for the class-derived code.
 
@@ -77,5 +77,7 @@ On 2026-11-15, the coil-disabled toggle firmware passed `make test` and `make al
 Later on 2026-11-15, the hold build passed `make test` and `make hold`, was flashed with readback verification, and reported `LOCK/OFF → UNLOCK/ON → LOCK/OFF` for USB `L`, `U`, `L`. Debugger reads confirmed PB5 HIGH then LOW. The 9 V adapter remained unplugged, so physical latch motion with this build is pending.
 
 After the photoresistor was removed from the design, `make test`, `make hold`, and `make all` passed. The updated hold image was flashed with readback verification. USB status reported `POT`, `BUTTON`, `REQUEST`, and `SOLENOID`, with no `LIGHT` field, while the board remained locked/off.
+
+The later course-code and style refactor passed the host test and both firmware builds. The Nucleo was disconnected, so this refactored image has not yet been flashed or checked on hardware. See the [bench log](prototype_progress.md) for the exact changes.
 
 `prototype_progress.md` holds the detailed test record and remaining measurements.

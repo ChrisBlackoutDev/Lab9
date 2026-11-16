@@ -20,7 +20,6 @@
 #include "uart1.h"
 #include "SafeLogic.h"
 
-#define POT_CHANNEL 18U
 #define BUTTON_BITNUM 10U
 #define BUTTON_BITMASK (1U << BUTTON_BITNUM)
 #define SOLENOID_BITNUM 5U
@@ -64,44 +63,33 @@ static void ApplyOutputs(const SafeState *state) {
                                          : (LED_BITMASK << GPIO_BSRR_RESET_BIT_OFFSET);
 }
 
-static int ReadADC(unsigned int channel) {
-    adc_setChannel(channel);
-    /* Lab 8 sensor check discarded the first ADC reading. */
-    if (adc_getValue() < 0) {
-        return -1;
-    }
-    return adc_getValue();
-}
-
 static void SendStatus(const SafeState *state) {
     char line[STATUS_LINE_CAPACITY] = {0};
+#if SOLENOID_HOLD_ENABLED > 0U
+    const char *solenoid_status = state->unlock_requested ? "ON" : "OFF";
+#else
+    const char *solenoid_status = "DISABLED";
+#endif
     (void)snprintf(line, sizeof(line), "POT=%u BUTTON=%s REQUEST=%s SOLENOID=%s\r\n",
                    (unsigned int)state->pot,
                    state->button_pressed ? "PRESSED" : "RELEASED",
                    state->unlock_requested ? "UNLOCK" : "LOCK",
-#if SOLENOID_HOLD_ENABLED > 0U
-                   state->unlock_requested ? "ON" : "OFF"
-#else
-                   "DISABLED"
-#endif
-    );
+                   solenoid_status);
     (void)BLE_Queue(line);
     printf("%s", line);
 }
 
-static void ProcessCommand(SafeState *state, int ch) {
-    if (ch == 'U' || ch == 'u') {
-        (void)ProcessSafeCommand(state, (char)ch);
-        (void)BLE_Queue(state->unlock_requested ? "UNLOCK REQUESTED\r\n"
-                                                : "LOCK REQUESTED\r\n");
+static void ProcessCommand(SafeState *state, int command) {
+    if (command == '?') {
         SendStatus(state);
-    } else if (ch == 'L' || ch == 'l') {
-        (void)ProcessSafeCommand(state, (char)ch);
-        (void)BLE_Queue("LOCK REQUESTED\r\n");
-        SendStatus(state);
-    } else if (ch == '?') {
-        SendStatus(state);
+        return;
     }
+    if (!ProcessSafeCommand(state, (char)command)) {
+        return;
+    }
+    (void)BLE_Queue(state->unlock_requested ? "UNLOCK REQUESTED\r\n"
+                                            : "LOCK REQUESTED\r\n");
+    SendStatus(state);
 }
 
 int main(void) {
@@ -129,7 +117,7 @@ int main(void) {
 
         if ((uint32_t)(now - last_sample) >= SAMPLE_MS) {
             last_sample = now;
-            int pot = ReadADC(POT_CHANNEL);
+            int pot = adc_getValue();
             if (pot < 0) {
                 LockSafe(&state);
             } else {

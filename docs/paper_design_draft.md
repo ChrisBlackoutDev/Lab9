@@ -37,4 +37,4 @@ Repeat:
       Send one queued BLE character when USART1 can accept it.
 ```
 
-The default `make all` build uses a persistent LED indication and holds PB5 low. The `make hold` build currently flashed on the board keeps PB5 HIGH for the unlock state and LOW for the lock state. The pushbutton is a toggle input; no door or latch position is sensed. The current hold build has been checked with the 9 V supply unplugged; powered sustained operation on this board remains to be observed.
+The default `make all` build uses a persistent LED indication and holds PB5 low. The `make hold` build keeps PB5 HIGH for the unlock state and LOW for the lock state. The pushbutton is a toggle input; no door or latch position is sensed. The prior hold build was checked with the 9 V supply unplugged; the latest source refactor has not yet been flashed or checked on hardware. Powered sustained operation on this board remains to be observed.

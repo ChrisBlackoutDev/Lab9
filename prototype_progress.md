@@ -1,5 +1,11 @@
 # Prototype progress
 
+## 2026-11-15 course-code and style review
+
+- Rechecked the course archive's `button.c`, `ADCPot.c`, `uart.c`, Day 4 button slides, Day 17 BLE slides, Lab 3 driver, and Lab 9 handout. The current GPIO, ADC, USART2, button-edge, and solenoid patterns follow those sources. The handout calls for student-written USART1 and BLE setup; no supplied source implements the shared button/pot/BLE lock state.
+- Simplified the project-specific code: the ADC now selects only PB1/channel 18 with the class single-channel pattern, the main loop reads that channel once, USB/BLE command handling shares one path, and BLE response variables have descriptive names. Kept the tested ADC calibration and bounded hardware waits. The updated November 10 style guide was checked for pin headers, constants, initialization, function names, comments, indentation, and braces.
+- `make test`, `make all`, and `make hold` passed. The Nucleo was not connected during this review, so the refactored image has not been flashed or checked on hardware.
+
 ## 2026-11-15 photoresistor removal
 
 - The group decided not to use the photoresistor. The firmware now samples only the potentiometer on A3/PB1, no longer configures A0/PA0 for ADC, and omits `LIGHT` from USB/BLE status. The lock inputs remain the pushbutton, pot gesture, and BLE/USB `U` command.

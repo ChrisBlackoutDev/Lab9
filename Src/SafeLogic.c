@@ -20,6 +20,7 @@ void SampleSafe(SafeState *state, uint32_t now, bool button_pressed, uint16_t po
     bool toggle = false;
     state->pot = pot;
 
+    /* A new press counts only after the input has remained stable for 25 ms. */
     if (!state->button_initialized) {
         /* An already-held button at boot is not a new press. */
         state->button_raw = button_pressed;
@@ -34,6 +35,7 @@ void SampleSafe(SafeState *state, uint32_t now, bool button_pressed, uint16_t po
         toggle = state->button_pressed;
     }
 
+    /* The pot must return to the low region before another high turn counts. */
     if (pot <= POT_LOW_MAX) {
         state->pot_armed = true;
     } else if (pot >= POT_HIGH_MIN && state->pot_armed) {
