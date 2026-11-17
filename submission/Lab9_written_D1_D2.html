@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ENGS 28 Lab 9 — Deliverables 1 and 2</title>
+<style>
+@page { size: letter; margin: 0.55in; }
+body { font-family: Arial, sans-serif; color: #172033; font-size: 10pt; line-height: 1.25; }
+h1 { font-size: 20pt; margin: 0 0 8pt; }
+h2 { font-size: 14pt; margin: 16pt 0 7pt; color: #173b87; }
+h3 { font-size: 11pt; margin: 12pt 0 5pt; }
+p { margin: 0 0 7pt; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt; }
+th, td { border: 1px solid #7d8999; padding: 4pt 5pt; text-align: left; vertical-align: top; }
+th { background: #e8f0fc; }
+ol { margin-top: 4pt; padding-left: 19pt; }
+li { margin: 0 0 4pt; }
+.page-break { page-break-before: always; }
+.diagram { width: 100%; height: auto; }
+.caption { font-size: 9pt; color: #475569; }
+</style>
+</head>
+<body>
+<h1>ENGS 28 Lab 9 — written deliverables</h1>
+<p><strong>Project:</strong> Bluetooth smart-safe breadboard prototype &nbsp;&nbsp;
+<strong>Name(s):</strong> ______________________________ &nbsp;&nbsp;
+<strong>Collaborator(s):</strong> ______________________________</p>
+
+<h2>Deliverable 1 — USART1 alternate-function settings</h2>
+<table>
+<thead><tr><th>USART1 function</th><th>Nucleo header</th><th>Port/pin</th><th>Alt. function</th><th>Bluefruit pin</th></tr></thead>
+<tbody>
+<tr><td>TX</td><td>D1</td><td>PB6</td><td>AF0</td><td>RXI</td></tr>
+<tr><td>RX</td><td>D0</td><td>PB7</td><td>AF0</td><td>TXO</td></tr>
+<tr><td>CTS</td><td>D5</td><td>PB4</td><td>AF4</td><td>RTS</td></tr>
+<tr><td>RTS</td><td>D3</td><td>PB3</td><td>AF4</td><td>CTS</td></tr>
+</tbody>
+</table>
+
+<h2>Deliverable 2 — paper design</h2>
+<h3>System and components</h3>
+<p>The NUCLEO-C031C6 controls a solenoid latch using a potentiometer, a pushbutton, or a Bluetooth UART command. A debounced button press, a low-to-high potentiometer turn, or the phone's <strong>U</strong> command toggles the requested lock state. The on-board LD4 LED indicates the requested unlock state. The Bluefruit module sends periodic status and accepts commands. The system continues to respond to local inputs when no phone is connected.</p>
+<p>The two inputs are the potentiometer and pushbutton. The output devices are the solenoid and the on-board LD4 LED. The breadboard has no door-position or latch-position sensor, so the status reports the requested state and commanded solenoid output.</p>
+
+<h3>Pin list and configuration</h3>
+<table>
+<thead><tr><th>Nucleo header / MCU pin</th><th>Configuration</th><th>Connection and use</th></tr></thead>
+<tbody>
+<tr><td>A3 / PB1</td><td>ADC1 channel 18, analog input</td><td>Potentiometer wiper; outer terminals to 3V3 and GND</td></tr>
+<tr><td>D4 / PB10</td><td>Digital input, internal pull-up</td><td>Pushbutton to GND; 0.15 µF capacitor from PB10 to GND</td></tr>
+<tr><td>D6 / PB5</td><td>Digital output</td><td>150 Ω resistor to KSC2073 base; HIGH requests solenoid energization</td></tr>
+<tr><td>D13 / PA5</td><td>Digital output</td><td>On-board LD4 LED; HIGH while unlock is requested</td></tr>
+<tr><td>D10 / PB0</td><td>Digital output</td><td>Bluefruit MOD; HIGH for CMD mode, LOW for UART data mode</td></tr>
+<tr><td>D1/PB6, D0/PB7</td><td>USART1 TX/RX, AF0</td><td>Bluefruit RXI/TXO respectively</td></tr>
+<tr><td>D5/PB4, D3/PB3</td><td>USART1 CTS/RTS, AF4</td><td>Bluefruit RTS/CTS respectively</td></tr>
+<tr><td>PA2 / PA3</td><td>USART2 TX/RX</td><td>ST-LINK USB virtual COM port</td></tr>
+</tbody>
+</table>
+<p><strong>Power:</strong> Nucleo 3V3 supplies the pot and Bluefruit VIN. The 9 V adapter's VIN connects to solenoid red; solenoid black connects to the transistor collector. The transistor emitter, adapter GND, Bluefruit GND, and Nucleo GND share ground. The 9 V positive rail remains separate from 3V3. A0/PA0 is unused.</p>
+
+<div class="page-break"></div>
+<h2>Deliverable 2 — software plan</h2>
+<h3>Peripherals and interrupts</h3>
+<p>ADC1 channel 18 reads the potentiometer. USART1 communicates with Bluefruit at 9600 baud using hardware RTS/CTS. USART2 provides a 9600 baud USB console. GPIO reads the pushbutton and drives PB5, PA5, and PB0. SysTick supplies a 1 ms timing interrupt. The main loop polls the ADC, button, and both UART receivers; it does not use UART or ADC interrupts.</p>
+<h3>High-level pseudocode</h3>
+<ol>
+<li>Start with PB5 and LD4 off. Configure GPIO, ADC1, USART2, and USART1.</li>
+<li>Put Bluefruit in CMD mode. Send factory reset, assign the unique name <strong>ENGS28-Safe-Kensa</strong>, send soft reset, and return to UART mode.</li>
+<li>Every 20 ms, read the pot and button. A new debounced button press toggles the request. A pot turn from the low region to the high region toggles once; returning low rearms it.</li>
+<li>When a Bluetooth or USB character arrives, <strong>U</strong> toggles the request, <strong>L</strong> requests lock, and <strong>?</strong> reports status. Continue local operation when no Bluetooth central is connected.</li>
+<li>Drive LD4 from the requested state. In the hold build, drive PB5 HIGH throughout the unlock request and LOW throughout the lock request.</li>
+<li>Every second, send pot, button, request, and solenoid-output status to Bluetooth and the USB console.</li>
+</ol>
+<p><strong>Build used for the working solenoid:</strong> <code>make hold</code> produces <code>build/hold/Lab9Prototype.bin</code>. The default <code>make all</code> image holds PB5 LOW for unpowered bench checks.</p>
+<p>The complete wiring schematic follows as the final page. It identifies electrical connections; breadboard hole placement depends on the actual board and part orientation.</p>
+</body>
+</html>
